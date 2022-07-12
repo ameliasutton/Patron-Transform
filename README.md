@@ -1,11 +1,8 @@
 
 
-# FOLIO Voucher Export
+# Patron Import
 
-Simple program with a few functions:
-* Trigger Batch Voucher Exports in FOLIO
-* Download Batched Vouchers in JSON format
-* Convert JSON formatted Batched Vouchers into the XML format required for import into Jaggaer
+Script to prepare UMass patron files for import into FOLIO using the FOLIO FSE Migration tools.
 
 ## Requirements
 
@@ -14,21 +11,24 @@ Simple program with a few functions:
 * json
 * pandas
 * datetime
-* winsound
+* sys
 
 
 ## Instructions
 
 * Create json config file in the following format:
 >{  
-    "staffFileName": "umpeople2.csv",  
-  "studentFileName": "umstdnt2.csv",  
-  "staffDestinationFolder": "Output/Staff load/",  
-  "studentDestinationFolder": "Output/Student load/",  
+    "staffFileName": "",  
+  "studentFileName": "",  
+  "staffDestinationFolder": "",  
+  "studentDestinationFolder": "",  
   "fullLoad": true,  
-  "previousStudentCondense": "Output/Load Process Files/Student-Condensed--2022-3-11--9-34-36.csv",  
-  "previousStaffCondense": "Output/Load Process Files/Staff-Condensed--2022-3-11--9-34-36.csv"  
+  "previousStudentCondense": "",  
+  "previousStaffCondense": "",
+  "loadProcessDirectory": "",
+  "logFileDirectory": ""
 }
+* Place Student and Staff data files in the program's directory.
 * Ensure that the fullLoad variable is set to False unless a full load is being run.
 * Run the script!
 
