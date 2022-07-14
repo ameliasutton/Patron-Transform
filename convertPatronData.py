@@ -658,14 +658,14 @@ class patronDataConverter:
         defaulted = 0
         no_barcode = 0
         for row in self.staffCSV.itertuples():
-            patron = row._asdict()
+            staff = row._asdict()
 
             # Assigns Patron Group
-            if patron["EmplClass"] in ["0", "1"]:
+            if staff["EmplClass"] in ["0", "1"]:
                 patron_group = "Faculty"
-            elif patron["EmplClass"] in ["S", "2", "3", "4", "5", "7"]:
+            elif staff["EmplClass"] in ["S", "2", "3", "4", "5", "7"]:
                 patron_group = "Staff"
-            elif patron["EmplClass"] == "#":
+            elif staff["EmplClass"] == "#":
                 patron_group = default_patron_group
                 defaulted += 1
             else:
@@ -673,56 +673,56 @@ class patronDataConverter:
                 defaulted += 1
 
             # Checks Patron Status and existence of a Barcode
-            if patron["EmplStatus"] == "T" or patron["EmplStatus"] == "D" or patron["EmplStatus"] == "R":
+            if staff["EmplStatus"] == "T" or staff["EmplStatus"] == "D" or staff["EmplStatus"] == "R":
                 if self.full:
                     continue
                 active = False
             else:
                 active = True
-            if patron["barcode"] == "":
+            if staff["barcode"] == "":
                 no_barcode += 1
-            if patron["Email_Address"] == "":
-                email = str(patron["EMPLID"]) + "@umass.edu"
+            if staff["Email_Address"] == "":
+                email = str(staff["EMPLID"]) + "@umass.edu"
             else:
-                email = patron["Email_Address"]
+                email = staff["Email_Address"]
 
 
             patron_json = {
                 "username": email,
-                "externalSystemId": str(patron["EMPLID"]) + "@umass.edu",
-                "barcode": patron["barcode"],
+                "externalSystemId": str(staff["EMPLID"]) + "@umass.edu",
+                "barcode": staff["barcode"],
                 "active": active,
                 "patronGroup": patron_group,
                 "departments": [],
                 "personal":
                     {
-                        "lastName": patron["LastName"],
-                        "firstName": patron["FirstName"],
-                        "middleName": patron["MiddleName"],
-                        "email": str(patron["EMPLID"]) + "@umass.edu",
-                        "phone": patron["WorkPhone"],
+                        "lastName": staff["LastName"],
+                        "firstName": staff["FirstName"],
+                        "middleName": staff["MiddleName"],
+                        "email": str(staff["EMPLID"]) + "@umass.edu",
+                        "phone": staff["WorkPhone"],
                         "addresses": [
                             {
-                                "countryId": patron["MailCountry"],
-                                "addressLine1": patron["MailAdd1"],
-                                "addressLine2": str(patron["MailAdd2"]) + " "
-                                                + str(patron["MailAdd3"]) + " "
-                                                + str(patron["MailAdd4"]),
-                                "city": patron["MailCity"],
-                                "region": patron["MailState"],
-                                "postalCode": patron["MailZip"],
+                                "countryId": staff["MailCountry"],
+                                "addressLine1": staff["MailAdd1"],
+                                "addressLine2": str(staff["MailAdd2"]) + " "
+                                                + str(staff["MailAdd3"]) + " "
+                                                + str(staff["MailAdd4"]),
+                                "city": staff["MailCity"],
+                                "region": staff["MailState"],
+                                "postalCode": staff["MailZip"],
                                 "addressTypeId": "Primary",
                                 "primaryAddress": True
                             },
                             {
-                                "countryId": patron["PermCountry"],
-                                "addressLine1": patron["PermAdd1"],
-                                "addressLine2": str(patron["PermAdd2"]) + " "
-                                                + str(patron["PermAdd3"]) + " "
-                                                + str(patron["PermAdd4"]),
-                                "city": patron["PermCity"],
-                                "region": patron["PermState"],
-                                "postalCode": patron["PermZip"],
+                                "countryId": staff["PermCountry"],
+                                "addressLine1": staff["PermAdd1"],
+                                "addressLine2": str(staff["PermAdd2"]) + " "
+                                                + str(staff["PermAdd3"]) + " "
+                                                + str(staff["PermAdd4"]),
+                                "city": staff["PermCity"],
+                                "region": staff["PermState"],
+                                "postalCode": staff["PermZip"],
                                 "addressTypeId": "Secondary",
                                 "primaryAddress": False
                             }
