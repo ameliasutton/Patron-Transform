@@ -681,6 +681,7 @@ class patronDataConverter:
                 active = True
             if staff["barcode"] == "":
                 no_barcode += 1
+
             if staff["Email_Address"] == "":
                 email = str(staff["EMPLID"]) + "@umass.edu"
             else:
@@ -699,7 +700,7 @@ class patronDataConverter:
                         "lastName": staff["LastName"],
                         "firstName": staff["FirstName"],
                         "middleName": staff["MiddleName"],
-                        "email": str(staff["EMPLID"]) + "@umass.edu",
+                        "email": email,
                         "phone": staff["WorkPhone"],
                         "addresses": [
                             {
@@ -767,7 +768,7 @@ class patronDataConverter:
 
 def generateLog():
     start = datetime.now()
-    logfile = f"FOLIO Patron Convert Output/Logs/{start.year}-{start.month}-{start.day}--{start.hour}-{start.minute}-{start.second}.log"
+    logfile = f"FOLIO_Patron_Convert_Output/Logs/{start.year}-{start.month}-{start.day}--{start.hour}-{start.minute}-{start.second}.log"
     print("Saving Log to: " + logfile)
     sys.stdout = open(logfile, "w")
     print("Log Start time: " + str(start) + "\n")
