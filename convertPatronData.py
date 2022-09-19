@@ -1,6 +1,7 @@
 import json
 import pandas
 from datetime import datetime
+from datetime import date
 import sys
 
 
@@ -313,7 +314,7 @@ class patronDataConverter:
             compared_fields = ["EmplClass", "EmplStatus", "LastName", "FirstName", "MiddleName", "Email_Address",
                                "MailCountry", "MailCity", "MailState", "MailZip", "MailAdd1", "MailAdd2", "MailAdd3",
                                "MailAdd4", "PermCountry", "PermCity", "PermState", "PermZip", "PermAdd1", "PermAdd2",
-                               "PermAdd3", "PermAdd4", "WorkPhone"]
+                               "PermAdd3", "PermAdd4", "WorkPhone", "barcode"]
 
             while (not file_ends["old"]) and (not file_ends["new"]):
                 next_old = False
@@ -382,7 +383,7 @@ class patronDataConverter:
                                "LastName", "FirstName", "MiddleName", "Email_Address", "MailCountry", "MailCity",
                                "MailState", "MailZip", "MailAdd1", "MailAdd2", "MailAdd3", "MailAdd4", "PermCountry",
                                "PermCity", "PermState", "PermZip", "PermAdd1", "PermAdd2", "PermAdd3", "PermAdd4",
-                               "TermDescr1", "TermDescr2", "TermDescr3", "LoclPhone"]
+                               "TermDescr1", "TermDescr2", "TermDescr3", "LoclPhone", "barcode"]
 
             while (not file_ends["old"]) and (not file_ends["new"]):
                 next_old = False
@@ -506,79 +507,105 @@ class patronDataConverter:
         for row in self.studentCSV.itertuples():
             student = row._asdict()
 
-            # Logic for determining Patron Group, prioritizes highest level programs of study.
+            # Logic for determining Patron Group, prioritizes highest level programs of study then latest graduation date.
 
             academic_career = [student["AcadCareer1"], student["AcadCareer2"], student["AcadCareer3"]]
             academic_programs = [student["AcadProg1"], student["AcadProg2"], student["AcadProg3"]]
             grad_terms = [student["TermDescr1"], student["TermDescr2"], student["TermDescr3"]]
             default_patron_group = "Undergraduate"
             grad_date = "UNKNOWN"
-            if ("GRAD" in academic_career) or ("ND" in academic_career):
-                if "GRAD" in academic_career:
-                    patron_group = "Graduate"
-                    grad_date = grad_terms[academic_career.index("GRAD")]
-                elif "ND" in academic_career:
-                    program = academic_programs[academic_career.index("ND")]
-                    if "ND-ST" in program:
-                        patron_group = "Undergraduate"
-                        grad_date = grad_terms[academic_programs.index("ND-ST")]
-                    elif "ND-UG" in program:
-                        patron_group = "Undergraduate"
-                        grad_date = grad_terms[academic_programs.index("ND-UG")]
-                    elif "ND-CE" in program:
-                        patron_group = "Undergraduate"
-                        grad_date = grad_terms[academic_programs.index("ND-CE")]
-                    elif "ND-GR" in program:
-                        patron_group = "Graduate"
-                        grad_date = grad_terms[academic_programs.index("ND-GR")]
-                    else:
-                        defaulted += 1
-                        patron_group = default_patron_group
-                else:
-                    defaulted += 1
-                    patron_group = default_patron_group
-            elif ("UGRD" in academic_career) or ("NC" in academic_career):
-                if "UGRD" in academic_career:
-                    patron_group = "Undergraduate"
-                    grad_date = grad_terms[academic_career.index("UGRD")]
-                elif "NC" in academic_career:
-                    program = academic_programs[academic_career.index("NC")]
-                    if program == "NC-LL":
-                        patron_group = "Undergraduate"
-                        grad_date = grad_terms[academic_programs.index(program)]
-                    else:
-                        defaulted += 1
-                        patron_group = default_patron_group
-                else:
-                    defaulted += 1
-                    patron_group = default_patron_group
+            graduate_options = []
+            undergraduate_options = []
+            if "GRAD" in academic_career:
+                term = grad_terms[academic_career.index("GRAD")]
+                graduate_options.append(term)
+            if "ND" in academic_career:
+                program = academic_programs[academic_career.index("ND")]
+                if program == "ND-ST":
+                    term = grad_terms[academic_programs.index(program)]
+                    undergraduate_options.append(term)
+                elif program == "ND-UG":
+                    term = grad_terms[academic_programs.index(program)]
+                    undergraduate_options.append(term)
+                elif program == "ND-CE":
+                    term = grad_terms[academic_programs.index(program)]
+                    undergraduate_options.append(term)
+                elif program == "ND-GR":
+                    term = grad_terms[academic_programs.index(program)]
+                    graduate_options.append(term)
+            if "UGRD" in academic_career:
+                term = grad_terms[academic_career.index("UGRD")]
+                undergraduate_options.append(term)
+            if "NC" in academic_career:
+                program = academic_programs[academic_career.index("NC")]
+                if program == "NC-LL":
+                    term = grad_terms[academic_programs.index(program)]
+                    undergraduate_options.append(term)
+            years = []
+            semesters = []
+            if graduate_options != [] and graduate_options != ['']:
+                patron_group = "Graduate"
+                for option in graduate_options:
+                    years.append(option[-4:])
+                    match option[:-5]:
+                        case "Sprng":
+                            semesters.append(4)
+                        case "Summr":
+                            semesters.append(3)
+                        case "Fall":
+                            semesters.append(2)
+                        case "Wintr":
+                            semesters.append(1)
+                year = max(years)
+                semester = max([semesters[s] for s, y in enumerate(years) if y == year])
+            elif undergraduate_options != [] and undergraduate_options != ['']:
+                patron_group = "Undergraduate"
+                for option in undergraduate_options:
+                    years.append(option[-4:])
+                    match option[:-5]:
+                        case "Sprng":
+                            semesters.append(4)
+                        case "Summr":
+                            semesters.append(3)
+                        case "Fall":
+                            semesters.append(2)
+                        case "Wintr":
+                            semesters.append(1)
+                year = max(years)
+                semester = max([semesters[s] for s, y in enumerate(years) if y == year])
+
             else:
                 defaulted += 1
+                print(academic_career)
+                print(academic_programs)
+                print(grad_terms)
                 patron_group = default_patron_group
+                year = datetime.now().year + 1
+                semester = 1
 
-            # Creates Expiration Dates based on Grad Term
-            # Dates are set to several days after the common end of semester dates to catch any minor deviations.
-            # If no Grad Term is known expiration date is set 1 year from the load date.
-            expire_date = ""
-
-            if grad_date[0:5] == 'Wintr':
-                grad_date = grad_date.replace('Wintr', 'Winter')
-                expire_date = f'{grad_date[-4:]}-02-15'
-            elif grad_date[0:5] == 'Summr':
-                grad_date = grad_date.replace('Summr', 'Summer')
-                expire_date = f'{grad_date[-4:]}-09-15'
-            elif grad_date[0:5] == 'Sprng':
-                grad_date = grad_date.replace('Sprng', 'Spring')
-                expire_date = f'{grad_date[-4:]}-06-05'
-            elif grad_date[0:4] == 'Fall':
-                expire_date = f'{int(grad_date[-4:]) + 1}-01-15'
-            elif patron_group == default_patron_group:
-                if self.time.month == 2 and self.time.day == 29:
-                    expire_date = f'{self.time.year + 1}-{self.time:%m}-{self.time.day - 1}'
+            match semester:
+                case 1:
+                    grad_date = f'Winter {year}'
+                    expire_date = f'{year}-02-15'
+                case 2:
+                    grad_date = f'Fall {year}'
+                    expire_date = f'{year}-01-15'
+                case 3:
+                    grad_date = f'Summer {year}'
+                    expire_date = f'{year}-09-15'
+                case 4:
+                    grad_date = f'Spring {year}'
+                    expire_date = f'{year}-06-05'
+            # Determines the student's preferred phone number if a preference exists.
+            try:
+                if student['Phone_Pref'] == 'LOCL':
+                    phone = student['LoclPhone']
+                elif student['Phone_Pref'] == 'PERM':
+                    phone = student['PermPhone']
                 else:
-                    expire_date = f'{self.time.year + 1}-{self.time:%m}-{self.time:%d}'
-                if grad_date == '':
-                    grad_date = 'UNKNOWN'
+                    phone = ''
+            except KeyError:
+                phone = student['LoclPhone']
 
             # Maps each patron's data into a list to be added to the output file
             patron_json = {
@@ -594,7 +621,7 @@ class patronDataConverter:
                         "firstName": student["FirstName"],
                         "middleName": student["MiddleName"],
                         "email": student["Email_Address"],
-                        "phone": student["LoclPhone"],
+                        "phone": phone,
                         "addresses": [
                             {
                                 "countryId": student["MailCountry"],
@@ -671,6 +698,12 @@ class patronDataConverter:
             else:
                 patron_group = default_patron_group
                 defaulted += 1
+            today = datetime.today()
+            try:
+                expiration_day = today.replace(year=today.year + 2)
+            except ValueError:
+                expiration_day = today + (date(today.year + 2, 1, 1) - date(today.year, 1, 1))
+            expiration_date = f'{expiration_day.year:04}-{expiration_day.month:02}-{expiration_day.day:02}'
 
             # Checks Patron Status and existence of a Barcode
             if staff["EmplStatus"] == "T" or staff["EmplStatus"] == "D" or staff["EmplStatus"] == "R":
@@ -730,6 +763,7 @@ class patronDataConverter:
                         ],
                         "preferredContactTypeId": "Email"
                     },
+                "expirationDate": expiration_date,
                 "customFields": {
                     "institution": "UMass Amherst"
                 }
@@ -766,9 +800,9 @@ class patronDataConverter:
             self.updateConfig("previousStudentCondense", file)
 
 
-def generateLog():
+def generateLog(filepath):
     start = datetime.now()
-    logfile = f"FOLIO_Patron_Convert_Output/Logs/{start.year}-{start.month}-{start.day}--{start.hour}-{start.minute}-{start.second}.log"
+    logfile = f"{filepath}{start.year}-{start.month}-{start.day}--{start.hour}-{start.minute}-{start.second}.log"
     print("Saving Log to: " + logfile)
     sys.stdout = open(logfile, "w")
     print("Log Start time: " + str(start) + "\n")
@@ -776,11 +810,20 @@ def generateLog():
 
 
 if __name__ == "__main__":
+    config_file_name = 'config.json'
+
+    try:
+        with open(config_file_name, "r") as readConf:
+            config = json.load(readConf)
+    except FileNotFoundError:
+        print("Config File Not Found")
+        raise FileNotFoundError
 
     # Begins writing to a log file and notes start time
-    start_time = generateLog()
+
+    start_time = generateLog(config["logFileDirectory"])
 
     # Actually uses the object to convert data
-    converter = patronDataConverter("config.json", start_time)
+    converter = patronDataConverter(config_file_name, start_time)
     converter.preparePatronLoad()
     converter.printElapsedTime()
