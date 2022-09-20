@@ -586,10 +586,10 @@ class patronDataConverter:
             match semester:
                 case 1:
                     grad_date = f'Winter {year}'
-                    expire_date = f'{year}-02-15'
+                    expire_date = f'{int(year)+1}-02-15'
                 case 2:
                     grad_date = f'Fall {year}'
-                    expire_date = f'{year}-01-15'
+                    expire_date = f'{int(year)+1}-01-15'
                 case 3:
                     grad_date = f'Summer {year}'
                     expire_date = f'{year}-09-15'
