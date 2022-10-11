@@ -2,6 +2,7 @@ import json
 import pandas
 from datetime import datetime
 from datetime import date
+from dateutil.relativedelta import relativedelta
 import sys
 
 
@@ -573,7 +574,6 @@ class patronDataConverter:
                             semesters.append(1)
                 year = max(years)
                 semester = max([semesters[s] for s, y in enumerate(years) if y == year])
-
             else:
                 defaulted += 1
                 print(academic_career)
@@ -581,9 +581,12 @@ class patronDataConverter:
                 print(grad_terms)
                 patron_group = default_patron_group
                 year = datetime.now().year + 1
-                semester = 1
+                semester = 0
 
             match semester:
+                case 0:
+                    expiration_day = datetime.today() + relativedelta(years=2)
+                    expire_date = f'{expiration_day.year:04}-{expiration_day.month:02}-{expiration_day.day:02}'
                 case 1:
                     grad_date = f'Winter {year}'
                     expire_date = f'{int(year)+1}-02-15'
@@ -596,6 +599,8 @@ class patronDataConverter:
                 case 4:
                     grad_date = f'Spring {year}'
                     expire_date = f'{year}-06-05'
+                    
+
             # Determines the student's preferred phone number if a preference exists.
             try:
                 if student['Phone_Pref'] == 'LOCL':

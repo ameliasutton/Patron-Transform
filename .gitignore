@@ -1,5 +1,10 @@
 /config.json
+/config-test.json
 /umstdnt2.csv
 /umpeople2.csv
-/FOLIO Patron Convert Output/*
+/FOLIO_Patron_Convert_Output
 /Old Test Data
+/.idea
+/.vscode
+/Testing_Output
+/Previously loaded Files
