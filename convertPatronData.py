@@ -578,7 +578,7 @@ class patronDataConverter:
                             case "Wintr":
                                 semesters.append(1)
                             case _:
-                                print(option[:-5])
+                                print(option[:-4])
                 max_year = max(years)
                 semester = max([semesters[index] for index, year in enumerate(years) if year == max_year])
             elif undergraduate_options != [] and undergraduate_options != ['']:
@@ -596,10 +596,7 @@ class patronDataConverter:
                             case "Wintr":
                                 semesters.append(1)
                             case _:
-                                print(option[:-5])
-                print(years)
-                print(semesters)
-                print(undergraduate_options)
+                                print(option[:-4])
                 max_year = max(years)
                 semester = max([semesters[index] for index, year in enumerate(years) if year == max_year])
             else:
