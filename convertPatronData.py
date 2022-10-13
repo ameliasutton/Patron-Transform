@@ -8,7 +8,8 @@ import sys
 
 class patronDataConverter:
     def __init__(self, configFile, time):
-        print("**********************************\n\nInitializing patron data converter...\n")
+        print(
+            "**********************************\n\nInitializing patron data converter...\n")
 
         # Opens Config File
         self.configFileName = configFile
@@ -43,7 +44,8 @@ class patronDataConverter:
         # Read staff file
         try:
             print(f"Reading staff file... \"{staff_file_name}\"...")
-            self.staffCSV = pandas.read_csv(staff_file_name, delimiter="|", dtype="string")
+            self.staffCSV = pandas.read_csv(
+                staff_file_name, delimiter="|", dtype="string")
         except FileNotFoundError:
             print(f"Staff load file, \"{staff_file_name}\", not found")
             raise FileNotFoundError
@@ -55,7 +57,8 @@ class patronDataConverter:
         # Read student file
         try:
             print(f"Reading student file... \"{student_file_name}\"...")
-            self.studentCSV = pandas.read_csv(student_file_name, delimiter="|", dtype="string")
+            self.studentCSV = pandas.read_csv(
+                student_file_name, delimiter="|", dtype="string")
         except FileNotFoundError:
             print(f"Student load file, \"{student_file_name}\", not found")
             raise FileNotFoundError
@@ -67,10 +70,13 @@ class patronDataConverter:
         if not self.full:
             # Read previous staff file
             try:
-                print(f"Reading previous staff file... \"{previous_staff_file_name}\"...")
-                self.previousStaffCSV = pandas.read_csv(previous_staff_file_name, delimiter="|", dtype="string")
+                print(
+                    f"Reading previous staff file... \"{previous_staff_file_name}\"...")
+                self.previousStaffCSV = pandas.read_csv(
+                    previous_staff_file_name, delimiter="|", dtype="string")
             except FileNotFoundError:
-                print(f"Previous staff load file, \"{previous_staff_file_name}\", not found")
+                print(
+                    f"Previous staff load file, \"{previous_staff_file_name}\", not found")
                 raise FileNotFoundError
             finally:
                 print("Sorting previous staff...")
@@ -79,10 +85,13 @@ class patronDataConverter:
 
             # Read previous student file
             try:
-                print(f"Reading previous student file... \"{previous_student_file_name}\"...")
-                self.previousStudentCSV = pandas.read_csv(previous_student_file_name, delimiter="|", dtype="string")
+                print(
+                    f"Reading previous student file... \"{previous_student_file_name}\"...")
+                self.previousStudentCSV = pandas.read_csv(
+                    previous_student_file_name, delimiter="|", dtype="string")
             except FileNotFoundError:
-                print(f"Previous student load file, \"{previous_student_file_name}\", not found")
+                print(
+                    f"Previous student load file, \"{previous_student_file_name}\", not found")
                 raise FileNotFoundError
             finally:
                 print("Sorting previous students...")
@@ -222,7 +231,8 @@ class patronDataConverter:
                 if len(current_id_rows) == 1:
                     records_out.append(current_id_rows[0])
                 elif len(current_id_rows) != 0:
-                    records_out.append(self.staffEMPLIDselector(current_id_rows))
+                    records_out.append(
+                        self.staffEMPLIDselector(current_id_rows))
                 last_emplid = row["EMPLID"]
                 current_id_rows = [row]
 
@@ -270,7 +280,8 @@ class patronDataConverter:
             selected_index = t_index
         else:
             for id_row in recordsWithSharedIDs:
-                print("EMPLID: " + id_row["EMPLID"] + " Status: " + id_row["EmplStatus"])
+                print("EMPLID: " + id_row["EMPLID"] +
+                      " Status: " + id_row["EmplStatus"])
 
         return recordsWithSharedIDs[selected_index]
 
@@ -460,7 +471,8 @@ class patronDataConverter:
                     staff_remaining.append(staff)
         self.staffCSV = pandas.DataFrame(staff_remaining)
 
-        print(f"Starting Staff Record Count: {str(staff_removed + len(staff_remaining))}")
+        print(
+            f"Starting Staff Record Count: {str(staff_removed + len(staff_remaining))}")
         print(f"Staff Records Removed: {str(staff_removed)}")
         print(f"Staff Records Remaining: {str(len(staff_remaining))}\n")
 
@@ -478,7 +490,8 @@ class patronDataConverter:
                 students_removed += 1
         self.studentCSV = pandas.DataFrame(students_remaining)
 
-        print(f"Starting Student Records: {str(students_removed + len(students_remaining))}")
+        print(
+            f"Starting Student Records: {str(students_removed + len(students_remaining))}")
         print(f"Student Records Removed: {str(students_removed)}")
         print(f"Student Records Remaining: {str(len(students_remaining))}\n")
 
@@ -510,9 +523,15 @@ class patronDataConverter:
 
             # Logic for determining Patron Group, prioritizes highest level programs of study then latest graduation date.
 
-            academic_career = [student["AcadCareer1"], student["AcadCareer2"], student["AcadCareer3"]]
-            academic_programs = [student["AcadProg1"], student["AcadProg2"], student["AcadProg3"]]
-            grad_terms = [student["TermDescr1"], student["TermDescr2"], student["TermDescr3"]]
+            academic_career = [student["AcadCareer1"],
+                               student["AcadCareer2"],
+                               student["AcadCareer3"]]
+            academic_programs = [student["AcadProg1"],
+                                 student["AcadProg2"],
+                                 student["AcadProg3"]]
+            grad_terms = [student["TermDescr1"],
+                          student["TermDescr2"],
+                          student["TermDescr3"]]
             default_patron_group = "Undergraduate"
             grad_date = "UNKNOWN"
             graduate_options = []
@@ -558,7 +577,8 @@ class patronDataConverter:
                         case "Wintr":
                             semesters.append(1)
                 year = max(years)
-                semester = max([semesters[s] for s, y in enumerate(years) if y == year])
+                semester = max([semesters[s]
+                               for s, y in enumerate(years) if y == year])
             elif undergraduate_options != [] and undergraduate_options != ['']:
                 patron_group = "Undergraduate"
                 for option in undergraduate_options:
@@ -573,7 +593,8 @@ class patronDataConverter:
                         case "Wintr":
                             semesters.append(1)
                 year = max(years)
-                semester = max([semesters[s] for s, y in enumerate(years) if y == year])
+                semester = max([semesters[s]
+                               for s, y in enumerate(years) if y == year])
             else:
                 defaulted += 1
                 print(academic_career)
@@ -599,7 +620,6 @@ class patronDataConverter:
                 case 4:
                     grad_date = f'Spring {year}'
                     expire_date = f'{year}-06-05'
-                    
 
             # Determines the student's preferred phone number if a preference exists.
             try:
@@ -632,8 +652,8 @@ class patronDataConverter:
                                 "countryId": student["MailCountry"],
                                 "addressLine1": student["MailAdd1"],
                                 "addressLine2": str(student["MailAdd2"]) + " "
-                                                + str(student["MailAdd3"]) + " "
-                                                + str(student["MailAdd4"]),
+                                + str(student["MailAdd3"]) + " "
+                                + str(student["MailAdd4"]),
                                 "city": student["MailCity"],
                                 "region": student["MailState"],
                                 "postalCode": student["MailZip"],
@@ -644,8 +664,8 @@ class patronDataConverter:
                                 "countryId": student["PermCountry"],
                                 "addressLine1": student["PermAdd1"],
                                 "addressLine2": str(student["PermAdd2"]) + " "
-                                                + str(student["PermAdd3"]) + " "
-                                                + str(student["PermAdd4"]),
+                                + str(student["PermAdd3"]) + " "
+                                + str(student["PermAdd4"]),
                                 "city": student["PermCity"],
                                 "region": student["PermState"],
                                 "postalCode": student["PermZip"],
@@ -654,7 +674,7 @@ class patronDataConverter:
                             }
                         ],
                         "preferredContactTypeId": "Email"
-                    },
+                },
                 "enrollmentDate": "",
                 "expirationDate": expire_date,
                 "customFields": {
@@ -666,14 +686,16 @@ class patronDataConverter:
             self.studentOut.append(patron_json)
 
         # Prints Statistics and Saves data to output file
-        print(f"Students defaulted to the 'Undergraduate' patron group: {str(defaulted)}")
+        print(
+            f"Students defaulted to the 'Undergraduate' patron group: {str(defaulted)}")
         print(f"{len(self.studentOut)} Student Records Converted")
         with open(self.studentOutFileName, 'w') as out:
             for student in self.studentOut:
                 out.write(json.dumps(student) + '\n')
         print(f"Student Records saved to: {self.studentOutFileName}")
         self.printElapsedTime()
-        print("Student Records converted successfully\n\n**********************************\n")
+        print(
+            "Student Records converted successfully\n\n**********************************\n")
 
     # Converts Staff records to FOLIO's json format and saves it in the output file
     def convertStaffFile(self):
@@ -707,7 +729,8 @@ class patronDataConverter:
             try:
                 expiration_day = today.replace(year=today.year + 2)
             except ValueError:
-                expiration_day = today + (date(today.year + 2, 1, 1) - date(today.year, 1, 1))
+                expiration_day = today + \
+                    (date(today.year + 2, 1, 1) - date(today.year, 1, 1))
             expiration_date = f'{expiration_day.year:04}-{expiration_day.month:02}-{expiration_day.day:02}'
 
             # Checks Patron Status and existence of a Barcode
@@ -724,7 +747,6 @@ class patronDataConverter:
                 email = str(staff["EMPLID"]) + "@umass.edu"
             else:
                 email = staff["Email_Address"]
-
 
             patron_json = {
                 "username": email,
@@ -745,8 +767,8 @@ class patronDataConverter:
                                 "countryId": staff["MailCountry"],
                                 "addressLine1": staff["MailAdd1"],
                                 "addressLine2": str(staff["MailAdd2"]) + " "
-                                                + str(staff["MailAdd3"]) + " "
-                                                + str(staff["MailAdd4"]),
+                                + str(staff["MailAdd3"]) + " "
+                                + str(staff["MailAdd4"]),
                                 "city": staff["MailCity"],
                                 "region": staff["MailState"],
                                 "postalCode": staff["MailZip"],
@@ -757,8 +779,8 @@ class patronDataConverter:
                                 "countryId": staff["PermCountry"],
                                 "addressLine1": staff["PermAdd1"],
                                 "addressLine2": str(staff["PermAdd2"]) + " "
-                                                + str(staff["PermAdd3"]) + " "
-                                                + str(staff["PermAdd4"]),
+                                + str(staff["PermAdd3"]) + " "
+                                + str(staff["PermAdd4"]),
                                 "city": staff["PermCity"],
                                 "region": staff["PermState"],
                                 "postalCode": staff["PermZip"],
@@ -767,7 +789,7 @@ class patronDataConverter:
                             }
                         ],
                         "preferredContactTypeId": "Email"
-                    },
+                },
                 "expirationDate": expiration_date,
                 "customFields": {
                     "institution": "UMass Amherst"
@@ -784,7 +806,8 @@ class patronDataConverter:
                 out.write(json.dumps(staff) + '\n')
         print(f"Staff Records saved to: {self.staffOutFileName}")
         self.printElapsedTime()
-        print("Staff Records converted successfully\n\n**********************************\n")
+        print(
+            "Staff Records converted successfully\n\n**********************************\n")
 
     # Saves Current Staff Data as a csv and triggers a config update if indicated for condensed files
     def saveCurrentStaffData(self, loadStep, updateConfig=False):
