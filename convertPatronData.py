@@ -566,42 +566,46 @@ class patronDataConverter:
             if graduate_options != [] and graduate_options != ['']:
                 patron_group = "Graduate"
                 for option in graduate_options:
-                    years.append(option[-4:])
-                    match option[:-5]:
-                        case "Sprng":
-                            semesters.append(4)
-                        case "Summr":
-                            semesters.append(3)
-                        case "Fall":
-                            semesters.append(2)
-                        case "Wintr":
-                            semesters.append(1)
-                year = max(years)
-                semester = max([semesters[s]
-                               for s, y in enumerate(years) if y == year])
+                    if option != '':
+                        years.append(option[-4:])
+                        match option[:-5]:
+                            case "Sprng":
+                                semesters.append(4)
+                            case "Summr":
+                                semesters.append(3)
+                            case "Fall":
+                                semesters.append(2)
+                            case "Wintr":
+                                semesters.append(1)
+                            case _:
+                                print(option[:-5])
+                max_year = max(years)
+                semester = max([semesters[index] for index, year in enumerate(years) if year == max_year])
             elif undergraduate_options != [] and undergraduate_options != ['']:
                 patron_group = "Undergraduate"
                 for option in undergraduate_options:
-                    years.append(option[-4:])
-                    match option[:-5]:
-                        case "Sprng":
-                            semesters.append(4)
-                        case "Summr":
-                            semesters.append(3)
-                        case "Fall":
-                            semesters.append(2)
-                        case "Wintr":
-                            semesters.append(1)
-                year = max(years)
-                semester = max([semesters[s]
-                               for s, y in enumerate(years) if y == year])
+                    if option != '':
+                        years.append(option[-4:])
+                        match option[:-5]:
+                            case "Sprng":
+                                semesters.append(4)
+                            case "Summr":
+                                semesters.append(3)
+                            case "Fall":
+                                semesters.append(2)
+                            case "Wintr":
+                                semesters.append(1)
+                            case _:
+                                print(option[:-5])
+                print(years)
+                print(semesters)
+                print(undergraduate_options)
+                max_year = max(years)
+                semester = max([semesters[index] for index, year in enumerate(years) if year == max_year])
             else:
                 defaulted += 1
-                print(academic_career)
-                print(academic_programs)
-                print(grad_terms)
                 patron_group = default_patron_group
-                year = datetime.now().year + 1
+                max_year = datetime.now().year + 1
                 semester = 0
 
             match semester:
@@ -609,17 +613,17 @@ class patronDataConverter:
                     expiration_day = datetime.today() + relativedelta(years=2)
                     expire_date = f'{expiration_day.year:04}-{expiration_day.month:02}-{expiration_day.day:02}'
                 case 1:
-                    grad_date = f'Winter {year}'
-                    expire_date = f'{int(year)+1}-02-15'
+                    grad_date = f'Winter {max_year}'
+                    expire_date = f'{int(max_year)+1}-02-15'
                 case 2:
-                    grad_date = f'Fall {year}'
-                    expire_date = f'{int(year)+1}-01-15'
+                    grad_date = f'Fall {max_year}'
+                    expire_date = f'{int(max_year)+1}-01-15'
                 case 3:
-                    grad_date = f'Summer {year}'
-                    expire_date = f'{year}-09-15'
+                    grad_date = f'Summer {max_year}'
+                    expire_date = f'{max_year}-09-15'
                 case 4:
-                    grad_date = f'Spring {year}'
-                    expire_date = f'{year}-06-05'
+                    grad_date = f'Spring {max_year}'
+                    expire_date = f'{max_year}-06-05'
 
             # Determines the student's preferred phone number if a preference exists.
             try:
@@ -734,7 +738,7 @@ class patronDataConverter:
             expiration_date = f'{expiration_day.year:04}-{expiration_day.month:02}-{expiration_day.day:02}'
 
             # Checks Patron Status and existence of a Barcode
-            if staff["EmplStatus"] == "T" or staff["EmplStatus"] == "D" or staff["EmplStatus"] == "R":
+            if staff["EmplStatus"] == "T" or staff["EmplStatus"] == "D":
                 if self.full:
                     continue
                 active = False
@@ -830,7 +834,7 @@ class patronDataConverter:
 
 def generateLog(filepath):
     start = datetime.now()
-    logfile = f"{filepath}{start.year}-{start.month}-{start.day}--{start.hour}-{start.minute}-{start.second}.log"
+    logfile = f"{filepath}/{start.year}-{start.month}-{start.day}--{start.hour}-{start.minute}-{start.second}.log"
     print("Saving Log to: " + logfile)
     sys.stdout = open(logfile, "w")
     print("Log Start time: " + str(start) + "\n")
