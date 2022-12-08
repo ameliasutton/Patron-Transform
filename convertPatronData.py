@@ -1,3 +1,4 @@
+from email import header
 import json
 import pandas
 from datetime import datetime
@@ -57,8 +58,11 @@ class patronDataConverter:
         # Read student file
         try:
             print(f"Reading student file... \"{student_file_name}\"...")
-            self.studentCSV = pandas.read_csv(
-                student_file_name, delimiter="|", dtype="string")
+            with open(student_file_name, 'r') as file:
+                headers = file.readline().strip().split('|')
+                self.studentCSV = pandas.read_csv(file, names=headers, delimiter='|', dtype='string')             
+                print (self.studentCSV.iloc[0])
+
         except FileNotFoundError:
             print(f"Student load file, \"{student_file_name}\", not found")
             raise FileNotFoundError
@@ -294,7 +298,7 @@ class patronDataConverter:
 
         for row in self.studentCSV.itertuples():
             patron = row._asdict()
-            if not patron["barcode"] == '':
+            if not (patron["barcode"] == '' or (patron['AcadProg1'] == '' and patron['AcadProg2'] == '' and patron ['AcadProg3'] == '')):
                 condensed_list.append(patron)
             else:
                 skipped += 1
@@ -624,9 +628,9 @@ class patronDataConverter:
 
             # Determines the student's preferred phone number if a preference exists.
             try:
-                if student['Phone_Pref'] == 'LOCL':
+                if student['Phone_Pref'][0:4] == 'LOCL':
                     phone = student['LoclPhone']
-                elif student['Phone_Pref'] == 'PERM':
+                elif student['Phone_Pref'][0:4] == 'PERM':
                     phone = student['PermPhone']
                 else:
                     phone = ''
@@ -844,6 +848,7 @@ if __name__ == "__main__":
     try:
         with open(config_file_name, "r") as readConf:
             config = json.load(readConf)
+            full = config['fullLoad']
     except FileNotFoundError:
         print("Config File Not Found")
         raise FileNotFoundError
@@ -851,7 +856,10 @@ if __name__ == "__main__":
     # Begins writing to a log file and notes start time
 
     start_time = generateLog(config["logFileDirectory"])
-
+    if full:
+        print('Preparing a full load...')
+    else:
+        print('Preparing an incremental load...')
     # Actually uses the object to convert data
     converter = patronDataConverter(config_file_name, start_time)
     converter.preparePatronLoad()
