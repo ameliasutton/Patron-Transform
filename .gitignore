@@ -1,4 +1,3 @@
-/config.json
 /config-test.json
 /umstdnt2.csv
 /umpeople2.csv
@@ -9,3 +8,4 @@
 PatronImport.code-workspace
 /Testing_Output
 /Previously loaded Files
+/test.py
