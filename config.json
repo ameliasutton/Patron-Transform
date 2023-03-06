@@ -1,10 +1,10 @@
 {
     "staffFileName": "umpeople2.csv",
     "studentFileName": "umstdnt2.csv",
-    "patronDestinationFolder": "FOLIO_Patron_Convert_Output/Patron_load",
+    "patronDestinationFolder": "FOLIO_Patron_Convert_Output/Patron_load/",
     "fullLoad": false,
-    "previousStudentCondense": "FOLIO_Patron_Convert_Output/Load_Process_Files/Student-Condensed--2023-3-2--11-57-29.csv",
-    "previousStaffCondense": "FOLIO_Patron_Convert_Output/Load_Process_Files/Staff-Condensed--2023-3-2--11-57-29.csv",
+    "previousStudentCondense": "FOLIO_Patron_Convert_Output/Load_Process_Files/Student-Condensed--2023-3-6--12-35-27.csv",
+    "previousStaffCondense": "FOLIO_Patron_Convert_Output/Load_Process_Files/Staff-Condensed--2023-3-6--12-35-27.csv",
     "loadProcessDirectory": "FOLIO_Patron_Convert_Output/Load_Process_Files",
     "logFileDirectory": "FOLIO_Patron_Convert_Output/Logs"
 }

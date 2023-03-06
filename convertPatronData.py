@@ -506,11 +506,7 @@ class patronDataConverter:
     # Converts Student records to FOLIO's json format and saves it in the output file
     def convertStudentFile(self):
         if self.studentCSV.keys().tolist() == []:
-            print("Student file contains no records, output file will contain no data\n"
-                  "\n**********************************\n")
-            with open(self.studentOutFileName, 'w') as out:
-                for student in self.studentOut:
-                    out.write(json.dumps(student))
+            print("Student file contains no records, output file will contain no student data\n")
             return -1
 
         print("Converting Student records to json...\n")
@@ -698,11 +694,7 @@ class patronDataConverter:
     # Converts Staff records to FOLIO's json format and saves it in the output file
     def convertStaffFile(self):
         if not self.staffCSV.keys().tolist():
-            print("Staff file contains no records, output file will contain no data\n"
-                  "\n**********************************\n")
-            with open(self.staffOutFileName, 'w') as out:
-                for staff in self.staffOut:
-                    out.write(json.dumps(staff))
+            print("Staff file contains no records, output file will contain no staff data\n")
             return -1
 
         print("Converting Staff records to json...\n")
