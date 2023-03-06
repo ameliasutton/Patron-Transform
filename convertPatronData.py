@@ -840,7 +840,7 @@ def generateLog(filepath):
 
 
 if __name__ == "__main__":
-    config_file_name = 'config-test.json'
+    config_file_name = 'config.json'
 
     try:
         with open(config_file_name, "r") as readConf:
