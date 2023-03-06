@@ -23,8 +23,7 @@ class patronDataConverter:
 
         # Reads Config File
         try:
-            self.studentOutFileName = config["studentDestinationFolder"]
-            self.staffOutFileName = config["staffDestinationFolder"]
+            self.patronOutFileName = config["patronDestinationFolder"]
             self.full = config["fullLoad"]
             self.loadProcessDirectory = config["loadProcessDirectory"]
             staff_file_name = config["staffFileName"]
@@ -33,8 +32,7 @@ class patronDataConverter:
             previous_student_file_name = config["previousStudentCondense"]
         except KeyError:
             print("Config file is missing required keys, required keys are:\n"
-                  "-studentDestinationFolder\n"
-                  "-staffDestinationFolder\n"
+                  "-patronDestinationFolder\n"
                   "-fullLoad (True/False)\n"
                   "-staffFileName\n"
                   "-studentFileName\n"
@@ -62,7 +60,6 @@ class patronDataConverter:
                 headers = file.readline().strip().split('|')
                 self.studentCSV = pandas.read_csv(file, names=headers, delimiter='|', dtype='string')             
                 print (self.studentCSV.iloc[0])
-
         except FileNotFoundError:
             print(f"Student load file, \"{student_file_name}\", not found")
             raise FileNotFoundError
@@ -109,14 +106,11 @@ class patronDataConverter:
         self.staffOut = []
 
         self.time = time
-        self.studentOutFileName += f"umstudents--{self.time.year}-{self.time.month}-{self.time.day}--" \
-                                   f"{self.time.hour}-{self.time.minute}-{self.time.second}.json"
-        self.staffOutFileName += f"umstaff--{self.time.year}-{self.time.month}-{self.time.day}--" \
+        self.patronOutFileName += f"umpatrons--{self.time.year}-{self.time.month}-{self.time.day}--" \
                                  f"{self.time.hour}-{self.time.minute}-{self.time.second}.json"
-
-        print("Prepared load files will be saved as: ")
-        print("\t" + self.staffOutFileName)
-        print("\t" + self.studentOutFileName)
+        
+        print("Prepared load file will be saved as: ")
+        print("\t" + self.patronOutFileName)
         self.printElapsedTime()
         print("Patron data converter initialized\n\n**********************************\n")
 
@@ -145,11 +139,12 @@ class patronDataConverter:
     def prepareIncrementalLoad(self):
         self.staffCondense()
         self.studentCondense()
+        self.recordComparisons()
         self.staffChanges()
         self.studentChanges()
-        self.recordComparisons()
         self.convertStudentFile()
         self.convertStaffFile()
+        self.saveLoadData()
 
     # Executes all steps involved in a FULL data load
     def prepareFullLoad(self):
@@ -158,6 +153,7 @@ class patronDataConverter:
         self.recordComparisons()
         self.convertStudentFile()
         self.convertStaffFile()
+        self.saveLoadData()
 
     # Calls the load function indicated by the config
     def preparePatronLoad(self):
@@ -694,10 +690,7 @@ class patronDataConverter:
         print(
             f"Students defaulted to the 'Undergraduate' patron group: {str(defaulted)}")
         print(f"{len(self.studentOut)} Student Records Converted")
-        with open(self.studentOutFileName, 'w') as out:
-            for student in self.studentOut:
-                out.write(json.dumps(student) + '\n')
-        print(f"Student Records saved to: {self.studentOutFileName}")
+
         self.printElapsedTime()
         print(
             "Student Records converted successfully\n\n**********************************\n")
@@ -805,11 +798,7 @@ class patronDataConverter:
 
         print(f"Staff with no barcodes: {no_barcode}")
         print(f"Staff defaulted to the 'Staff' patron group: {defaulted}")
-        print(f"{len(self.staffOut)} Staff Records Converted")
-        with open(self.staffOutFileName, 'w') as out:
-            for staff in self.staffOut:
-                out.write(json.dumps(staff) + '\n')
-        print(f"Staff Records saved to: {self.staffOutFileName}")
+        print(f"{len(self.staffOut)} Staff Records Converted")        
         self.printElapsedTime()
         print(
             "Staff Records converted successfully\n\n**********************************\n")
@@ -832,6 +821,14 @@ class patronDataConverter:
         if updateConfig and loadStep == "Condensed":
             self.updateConfig("previousStudentCondense", file)
 
+    # Saves Current Staff and Student data together in a json file that is ready-to-load
+    def saveLoadData(self):
+        with open(self.patronOutFileName, 'w') as outfile:
+            for staff in self.staffOut:
+                outfile.write(f"{json.dumps(staff)}\n")
+            for student in self.studentOut:
+                outfile.write(f"{json.dumps(student)}\n")
+        print(f"Patron Records saved to: {self.patronOutFileName}")
 
 def generateLog(filepath):
     start = datetime.now()
@@ -843,7 +840,7 @@ def generateLog(filepath):
 
 
 if __name__ == "__main__":
-    config_file_name = 'config.json'
+    config_file_name = 'config-test.json'
 
     try:
         with open(config_file_name, "r") as readConf:
