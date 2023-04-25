@@ -8,104 +8,111 @@ import dotenv
 import os
 
 
-class patronDataConverter:
-    def __init__(self, configName, time):
+class PatronDataTransformer:
+    def __init__(self, config_name, time):
         logging.info("Initializing patron data converter...")
-        self.configFileName = configName
-        
+        self.config_file_name = config_name
+
         # Read staff file
         try:
-            logging.info(f"Reading staff file... \"{os.getenv('staffFileName')}\"...")
-            self.staffCSV = pandas.read_csv(
+            logging.info('Reading staff file... \"%s\"...',
+                         os.getenv('staffFileName'))
+            self.staff_CSV = pandas.read_csv(
                 os.getenv('staffFileName'), delimiter="|", dtype="string")
-        except FileNotFoundError:
-            logging.critical(f"Staff load file, \"{os.getenv('staffFileName')}\", not found")
-            raise FileNotFoundError
+        except FileNotFoundError as exc:
+            logging.critical('Staff load file, \"%s\", not found',
+                             os.getenv('staffFileName'))
+            raise FileNotFoundError from exc
         finally:
             logging.info("Sorting staff...")
-            self.staffCSV.sort_values("EMPLID")
-            self.staffCSV.fillna("", inplace=True)
+            self.staff_CSV.sort_values("EMPLID")
+            self.staff_CSV.fillna("", inplace=True)
 
         # Read student file
         try:
-            logging.info(f"Reading student file... \"{os.getenv('studentFileName')}\"...")
-            with open(os.getenv('studentFileName'), 'r') as file:
+            logging.info('Reading student file... \"%s\"...',
+                         os.getenv('studentFileName'))
+            with open(os.getenv('studentFileName'), 'r', encoding='utf-8') as file:
                 headers = file.readline().strip().split('|')
-                self.studentCSV = pandas.read_csv(file, names=headers, delimiter='|', dtype='string')             
-        except FileNotFoundError:
-            logging.critical(f"Student load file, \"{os.getenv('studentFileName')}\", not found")
-            raise FileNotFoundError
+                self.student_CSV = pandas.read_csv(
+                    file, names=headers, delimiter='|', dtype='string')
+        except FileNotFoundError as exc:
+            logging.critical('Student load file, \"%s\", not found',
+                             os.getenv('studentFileName'))
+            raise FileNotFoundError from exc
         finally:
             logging.info("Sorting students...")
-            self.studentCSV.sort_values("EMPLID")
-            self.studentCSV.fillna("", inplace=True)
+            self.student_CSV.sort_values("EMPLID")
+            self.student_CSV.fillna("", inplace=True)
 
         if os.getenv('fullLoad').lower() in ('true', '1', 't'):
-            self.fullLoad = True
+            self.full_load = True
         elif os.getenv('fullLoad').lower() in ('false', '0', 'f'):
-            self.fullLoad = False
+            self.full_load = False
         else:
             logging.critical('Invalid fullLoad value. Use True or False')
             raise ValueError('Invalid fullLoad value. Use True or False')
-        
 
-        if not self.fullLoad:
+        if not self.full_load:
             # Read previous staff file
             try:
-                logging.info(
-                    f"Reading previous staff file... \"{os.getenv('previousStaffCondense')}\"...")
-                self.previousStaffCSV = pandas.read_csv(
+                logging.info('Reading previous staff file... \"%s\"...',
+                             os.getenv('previousStaffCondense'))
+                self.previous_staff_CSV = pandas.read_csv(
                     os.getenv('previousStaffCondense'), delimiter="|", dtype="string")
-            except FileNotFoundError:
-                logging.critical(
-                    f"Previous staff load file, \"{os.getenv('previousStaffCondense')}\", not found")
-                raise FileNotFoundError
+            except FileNotFoundError as exc:
+                logging.critical('Previous staff load file, \"%s\", not found', os.getenv(
+                    'previousStaffCondense'))
+                raise FileNotFoundError from exc
             finally:
                 logging.info("Sorting previous staff...")
-                self.previousStaffCSV.sort_values("EMPLID")
-                self.previousStaffCSV.fillna("", inplace=True)
+                self.previous_staff_CSV.sort_values("EMPLID")
+                self.previous_staff_CSV.fillna("", inplace=True)
 
             # Read previous student file
             try:
-                logging.info(
-                    f"Reading previous student file... \"{os.getenv('previousStudentCondense')}\"...")
-                self.previousStudentCSV = pandas.read_csv(
+                logging.info('Reading previous student file... \"%s\"...', os.getenv(
+                    'previousStudentCondense'))
+                self.previous_student_CSV = pandas.read_csv(
                     os.getenv('previousStudentCondense'), delimiter="|", dtype="string")
-            except FileNotFoundError:
-                logging.critical(
-                    f"Previous student load file, \"{os.getenv('previousStudentCondense')}\", not found")
-                raise FileNotFoundError
+            except FileNotFoundError as exc:
+                logging.critical('Previous student load file, \"%s\", not found', os.getenv(
+                    'previousStudentCondense'))
+                raise FileNotFoundError from exc
             finally:
                 logging.info("Sorting previous students...")
-                self.previousStudentCSV.sort_values("EMPLID")
-                self.previousStudentCSV.fillna("", inplace=True)
+                self.previous_student_CSV.sort_values("EMPLID")
+                self.previous_student_CSV.fillna("", inplace=True)
 
         logging.info("Files read and sorted")
 
         # Initializes blank Output file dicts
-        self.studentOut = []
-        self.staffOut = []
+        self.student_out = []
+        self.staff_out = []
 
         self.time = time
-        self.patronOutFileName = f'{os.getenv("destinationFolder")}umpatrons--{self.time.year}-{self.time.month}-{self.time.day}--' \
-                                 f'{self.time.hour}-{self.time.minute}-{self.time.second}.json'
-        
-        logging.info(f"Prepared load file will be saved as: {self.patronOutFileName}")
+        if os.getenv('destinationFolder')[-1:] == '/':
+            self.patron_out_file_name = f'{os.getenv("destinationFolder")}umpatrons.json'
+        else:
+            self.patron_out_file_name = f'{os.getenv("destinationFolder")}/umpatrons.json'
+
+        logging.info('Prepared load file will be saved as: %s',
+                     self.patron_out_file_name)
         self._logElapsedTime()
         logging.info("Patron data converter initialized\n")
-        
 
     # Logs time elapsed since the time passed into the object on initialization
+
     def _logElapsedTime(self):
         time_now = datetime.now()
         elapsed_time = time_now - self.time
-        logging.info(f"Total elapsed time (seconds): {elapsed_time.seconds}")
+        logging.info('Total elapsed time (seconds): %s', elapsed_time.seconds)
 
     # Update Config File with changed
-    def _updateConfig(self, field, data):
+    def _updateConfig(self, config_field, data):
         try:
-            os.environ[field] = data
-            dotenv.set_key(self.configFileName, field, data)
+            os.environ[config_field] = data
+            dotenv.set_key(self.config_file_name, config_field, data)
         except PermissionError:
             return -1
 
@@ -116,8 +123,8 @@ class patronDataConverter:
         self.recordComparisons()
         self.staffChanges()
         self.studentChanges()
-        self.convertStudentFile()
-        self.convertStaffFile()
+        self.transformStudentRecords()
+        self.transformStaffRecords()
         self.saveLoadData()
 
     # Executes all steps involved in a FULL data load
@@ -125,16 +132,17 @@ class patronDataConverter:
         self.staffCondense()
         self.studentCondense()
         self.recordComparisons()
-        self.convertStudentFile()
-        self.convertStaffFile()
+        self.transformStudentRecords()
+        self.transformStaffRecords()
         self.saveLoadData()
 
     # Calls the load function indicated by the config
     def preparePatronLoad(self):
-        if self.fullLoad:
+        if self.full_load:
             self._prepareFullLoad()
         else:
             self._prepareIncrementalLoad()
+        self._logElapsedTime()
 
     # Removes Staff outside of the desired Staff Classes as well as those without barcodes
     def staffCondense(self):
@@ -144,7 +152,7 @@ class patronDataConverter:
         condensed_list = []
         allowed_classes = ["0", "1", "2", "3", "4", "5", "7", "S", "B", "#"]
 
-        for row in self.staffCSV.itertuples():
+        for row in self.staff_CSV.itertuples():
             patron = row._asdict()
 
             # Selects only records from allowed classes
@@ -165,13 +173,13 @@ class patronDataConverter:
         # Removes records with duplicate EMPLID
         deduped_condensed_list = self.staffDeDupe(condensed_list)
 
-        self.staffCSV = pandas.DataFrame(deduped_condensed_list)
-        logging.info("Saved Records: " + str(len(deduped_condensed_list)))
-        logging.info("Skipped Records: " + str(skipped))
+        self.staff_CSV = pandas.DataFrame(deduped_condensed_list)
+        logging.info('Saved Records: %s', len(deduped_condensed_list))
+        logging.info('Skipped Records: %s', skipped)
 
         # Saves condensed staff data for later comparison
         logging.info("Saving Condensed Staff data...")
-        self.saveCurrentStaffData("Condensed", updateConfig=True)
+        self.saveCurrentStaffData("Condensed", update_config=True)
         logging.info("Condensed Staff Data Saved")
 
         self._logElapsedTime()
@@ -214,7 +222,7 @@ class patronDataConverter:
         return records_out
 
     # Selects a record using logic
-    def staffEMPLIDselector(self, recordsWithSharedIDs):
+    def staffEMPLIDselector(self, records_with_shared_ids):
         a_index = -1
         d_index = -1
         l_index = -1
@@ -222,7 +230,7 @@ class patronDataConverter:
         s_index = -1
         t_index = -1
         w_index = -1
-        for i, id_row in enumerate(recordsWithSharedIDs):
+        for i, id_row in enumerate(records_with_shared_ids):
             if id_row["EmplStatus"] == "A":
                 a_index = i
             elif id_row["EmplStatus"] == "D":
@@ -253,33 +261,32 @@ class patronDataConverter:
         elif t_index != -1:
             selected_index = t_index
         else:
-            for id_row in recordsWithSharedIDs:
-                logging.warning("Duplicate records unresolved EMPLID: " + id_row["EMPLID"] +
-                      " Status: " + id_row["EmplStatus"])
-
-        return recordsWithSharedIDs[selected_index]
+            for id_row in records_with_shared_ids:
+                logging.warning('Duplicate records unresolved EMPLID: %s Status: %s',
+                                id_row["EMPLID"], id_row["EmplStatus"])
+        return records_with_shared_ids[selected_index]
 
     # Removes Staff records without barcodes
     def studentCondense(self):
         logging.info("Condensing Student Records...")
-        logging.info("Starting Record Count: " + str(len(self.studentCSV)))
+        logging.info('Starting Record Count: %s', len(self.student_CSV))
         skipped = 0
         condensed_list = []
 
-        for row in self.studentCSV.itertuples():
+        for row in self.student_CSV.itertuples():
             patron = row._asdict()
-            if not (patron["barcode"] == '' or (patron['AcadProg1'] == '' and patron['AcadProg2'] == '' and patron ['AcadProg3'] == '')):
+            if not (patron["barcode"] == '' or (patron['AcadProg1'] == '' and patron['AcadProg2'] == '' and patron['AcadProg3'] == '')):
                 condensed_list.append(patron)
             else:
                 skipped += 1
 
-        self.studentCSV = pandas.DataFrame(condensed_list)
+        self.student_CSV = pandas.DataFrame(condensed_list)
 
-        logging.info(f"Saved Records: {str(len(condensed_list))}")
-        logging.info(f"Skipped Records: {str(skipped)}")
+        logging.info('Saved Records: %s', str(len(condensed_list)))
+        logging.info('Skipped Records: %s', str(skipped))
 
         logging.info("Saving Condensed Student data")
-        self.saveCurrentStudentData("Condensed", updateConfig=True)
+        self.saveCurrentStudentData("Condensed", update_config=True)
         logging.info("Condensed Student Data Saved")
         self._logElapsedTime()
         logging.info("Student Records Condensed\n")
@@ -287,10 +294,10 @@ class patronDataConverter:
     # Includes only records that differ from the previous Staff load
     def staffChanges(self):
         logging.info("Comparing Old and New Staff Files...")
-        if not self.fullLoad:
-            old_staff = self.previousStaffCSV.itertuples()
+        if not self.full_load:
+            old_staff = self.previous_staff_CSV.itertuples()
             old_record = next(old_staff)._asdict()
-            new_staff = self.staffCSV.itertuples()
+            new_staff = self.staff_CSV.itertuples()
             new_record = next(new_staff)._asdict()
 
             staff_changes = []
@@ -314,14 +321,16 @@ class patronDataConverter:
                     next_new = True
                 else:
                     change = False
-                    for field in compared_fields:
-                        if str(old_record[field]) != (new_record[field]):
-                            logging.info(f"Modified field: {field}")
+                    for compared_field in compared_fields:
+                        if str(old_record[compared_field]) != (new_record[compared_field]):
+                            logging.info('Modified field: %s', compared_field)
                             change = True
                             break
                     if change:
-                        logging.info(f"Modified field - Old Record: {old_record}")
-                        logging.info(f"Modified field - New Record: {new_record}")
+                        logging.info(
+                            'Modified field - Old Record: %s', old_record)
+                        logging.info(
+                            'Modified field - New Record: %s', new_record)
                         staff_changes.append(new_record)
                         updated += 1
                     next_old = True
@@ -338,25 +347,26 @@ class patronDataConverter:
                     except StopIteration:
                         file_ends["new"] = True
 
-            self.staffCSV = pandas.DataFrame(staff_changes)
+            self.staff_CSV = pandas.DataFrame(staff_changes)
 
             self.saveCurrentStaffData("Old-New-Compare")
-            logging.info(f"Updated: {updated}")
-            logging.info(f"New: {new}")
-            logging.info(f"Total Staff Changes Found: {str(len(staff_changes))}")
+            logging.info('Updated: %s', updated)
+            logging.info('New: %s', new)
+            logging.info('Total Staff Changes Found: %s', len(staff_changes))
             self._logElapsedTime()
             logging.info("Old/New Staff comparison complete\n")
         else:
-            logging.warning("\nIncremental load selected, staff change comparison should not be performed\n")
+            logging.warning(
+                "\nIncremental load selected, staff change comparison should not be performed\n")
             return -1
 
     # Includes only records that differ from the previous Student load
     def studentChanges(self):
         logging.info("Comparing Old and New Student Files...")
-        if not self.fullLoad:
-            old_student = self.previousStudentCSV.itertuples()
+        if not self.full_load:
+            old_student = self.previous_student_CSV.itertuples()
             old_record = next(old_student)._asdict()
-            new_student = self.studentCSV.itertuples()
+            new_student = self.student_CSV.itertuples()
             new_record = next(new_student)._asdict()
 
             student_changes = []
@@ -381,14 +391,16 @@ class patronDataConverter:
                     next_new = True
                 else:
                     change = False
-                    for field in compared_fields:
-                        if str(old_record[field]) != (new_record[field]):
-                            logging.info(f"Modified field: {field}")
+                    for compared_field in compared_fields:
+                        if str(old_record[compared_field]) != (new_record[compared_field]):
+                            logging.info('Modified field: %s', compared_field)
                             change = True
                             break
                     if change:
-                        logging.info(f"Modified field - Old Record: {old_record}")
-                        logging.info(f"Modified field - New Record: {new_record}")
+                        logging.info(
+                            'Modified field - Old Record: %s', old_record)
+                        logging.info(
+                            'Modified field - New Record: %s', new_record)
                         student_changes.append(new_record)
                         updated += 1
                     next_old = True
@@ -405,31 +417,34 @@ class patronDataConverter:
                     except StopIteration:
                         file_ends["new"] = True
 
-            self.studentCSV = pandas.DataFrame(student_changes)
+            self.student_CSV = pandas.DataFrame(student_changes)
             self.saveCurrentStudentData("Old-New-Compare")
-            logging.info(f"Updated: {updated}")
-            logging.info(f"New: {new}")
-            logging.info(f"Total Student Changes Found: {str(len(student_changes))}")
+            logging.info('Updated: %s', updated)
+            logging.info('New: %s', new)
+            logging.info('Total Student Changes Found: %s',
+                         str(len(student_changes)))
             self._logElapsedTime()
             logging.info("Old/New Student comparison complete\n")
         else:
-            logging.warning("\nIncremental load selected, student change comparison should not be performed\n")
+            logging.warning(
+                "\nIncremental load selected, student change comparison should not be performed\n")
             return -1
 
     # Compares both sets of patron records and appropriately removes records
     def recordComparisons(self):
-        if (self.staffCSV.keys().tolist() == []) or (self.studentCSV.keys().tolist() == []):
-            logging.warning("No Record Comparison Necessary, one of both of the load files contain no records\n")
+        if (self.staff_CSV.keys().tolist() == []) or (self.student_CSV.keys().tolist() == []):
+            logging.warning(
+                "No Record Comparison Necessary, one of both of the load files contain no records\n")
             return -1
 
         logging.info("Beginning Student/Staff record comparison...\n")
 
         staff_removed = 0
         staff_remaining = []
-        student_ids = self.studentCSV["EMPLID"].tolist()
+        student_ids = self.student_CSV["EMPLID"].tolist()
 
         # Removes Terminated (T) and Suspended (S) Staff who appear in the student load
-        for record in self.staffCSV.itertuples():
+        for record in self.staff_CSV.itertuples():
             staff = record._asdict()
             if staff["EmplStatus"] != "T" and staff["EmplStatus"] != "S":
                 staff_remaining.append(staff)
@@ -438,29 +453,32 @@ class patronDataConverter:
                     staff_removed += 1
                 else:
                     staff_remaining.append(staff)
-        self.staffCSV = pandas.DataFrame(staff_remaining)
+        self.staff_CSV = pandas.DataFrame(staff_remaining)
 
-        logging.info(f"Starting Staff Record Count: {str(staff_removed + len(staff_remaining))}")
+        logging.info(
+            f"Starting Staff Record Count: {str(staff_removed + len(staff_remaining))}")
         logging.info(f"Staff Records Removed: {str(staff_removed)}")
         logging.info(f"Staff Records Remaining: {str(len(staff_remaining))}")
 
         students_removed = 0
         students_remaining = []
-        staff_ids = self.staffCSV["EMPLID"].tolist()
+        staff_ids = self.staff_CSV["EMPLID"].tolist()
 
         # Removes Students who appear in the Staff load
-        for record in self.studentCSV.itertuples():
+        for record in self.student_CSV.itertuples():
             student = record._asdict()
 
             if not student["EMPLID"] in staff_ids:
                 students_remaining.append(student)
             else:
                 students_removed += 1
-        self.studentCSV = pandas.DataFrame(students_remaining)
+        self.student_CSV = pandas.DataFrame(students_remaining)
 
-        logging.info(f"Starting Student Records: {str(students_removed + len(students_remaining))}")
+        logging.info(
+            f"Starting Student Records: {str(students_removed + len(students_remaining))}")
         logging.info(f"Student Records Removed: {str(students_removed)}")
-        logging.info(f"Student Records Remaining: {str(len(students_remaining))}\n")
+        logging.info(
+            f"Student Records Remaining: {str(len(students_remaining))}\n")
 
         logging.info("Saving Compared Files...")
         self.saveCurrentStaffData("Intra-File-Compared")
@@ -471,9 +489,10 @@ class patronDataConverter:
         logging.info("Student/Staff record comparison complete\n")
 
     # Converts Student records to FOLIO's json format and saves it in the output file
-    def convertStudentFile(self):
-        if self.studentCSV.keys().tolist() == []:
-            logging.warning("Student file contains no records, output file will contain no student data\n")
+    def transformStudentRecords(self):
+        if self.student_CSV.keys().tolist() == []:
+            logging.warning(
+                "Student file contains no records, output file will contain no student data\n")
             return -1
 
         logging.info("Converting Student records to json...\n")
@@ -481,7 +500,7 @@ class patronDataConverter:
         defaulted = 0
 
         # Iterates through all patron records
-        for row in self.studentCSV.itertuples():
+        for row in self.student_CSV.itertuples():
             student = row._asdict()
 
             # Logic for determining Patron Group, prioritizes highest level programs of study then latest graduation date.
@@ -526,7 +545,7 @@ class patronDataConverter:
                     undergraduate_options.append(term)
             years = []
             semesters = []
-            if graduate_options != [] and graduate_options != ['']:
+            if graduate_options and graduate_options != ['']:
                 patron_group = "Graduate"
                 for option in graduate_options:
                     if option != '':
@@ -541,10 +560,12 @@ class patronDataConverter:
                             case "Wintr":
                                 semesters.append(1)
                             case _:
-                                logging.warn(f'Malformed Graduation Date: {option}')
+                                logging.warning(
+                                    'Malformed Graduation Date: %s', option)
                 max_year = max(years)
-                semester = max([semesters[index] for index, year in enumerate(years) if year == max_year])
-            elif undergraduate_options != [] and undergraduate_options != ['']:
+                semester = max([semesters[index] for index,
+                               year in enumerate(years) if year == max_year])
+            elif undergraduate_options and undergraduate_options != ['']:
                 patron_group = "Undergraduate"
                 for option in undergraduate_options:
                     if option != '':
@@ -559,9 +580,11 @@ class patronDataConverter:
                             case "Wintr":
                                 semesters.append(1)
                             case _:
-                                logging.warn(f'Malformed Graduation Date: {option}')
+                                logging.warning(
+                                    'Malformed Graduation Date: %s', option)
                 max_year = max(years)
-                semester = max([semesters[index] for index, year in enumerate(years) if year == max_year])
+                semester = max([semesters[index] for index,
+                               year in enumerate(years) if year == max_year])
             else:
                 defaulted += 1
                 patron_group = default_patron_group
@@ -647,25 +670,27 @@ class patronDataConverter:
                 }
             }
 
-            self.studentOut.append(patron_json)
+            self.student_out.append(patron_json)
 
         # Logs Statistics and Saves data to output file
-        logging.info(f"Students defaulted to the 'Undergraduate' patron group: {str(defaulted)}")
-        logging.info(f"{len(self.studentOut)} Student Records Converted")
+        logging.info(
+            'Students defaulted to the \'Undergraduate\' patron group: %s', str(defaulted))
+        logging.info('%s Student Records Converted', len(self.student_out))
         self._logElapsedTime()
         logging.info("Student Records converted successfully\n")
 
     # Converts Staff records to FOLIO's json format and saves it in the output file
-    def convertStaffFile(self):
-        if not self.staffCSV.keys().tolist():
-            logging.warning("Staff file contains no records, output file will contain no staff data\n")
+    def transformStaffRecords(self):
+        if not self.staff_CSV.keys().tolist():
+            logging.warning(
+                "Staff file contains no records, output file will contain no staff data\n")
             return -1
 
         logging.info("Converting Staff records to json...\n")
         default_patron_group = "Staff"
         defaulted = 0
         no_barcode = 0
-        for row in self.staffCSV.itertuples():
+        for row in self.staff_CSV.itertuples():
             staff = row._asdict()
 
             # Assigns Patron Group
@@ -689,7 +714,7 @@ class patronDataConverter:
 
             # Checks Patron Status and existence of a Barcode
             if staff["EmplStatus"] == "T" or staff["EmplStatus"] == "D":
-                if self.fullLoad:
+                if self.full_load:
                     continue
                 active = False
             else:
@@ -750,40 +775,39 @@ class patronDataConverter:
                 }
             }
 
-            self.staffOut.append(patron_json)
+            self.staff_out.append(patron_json)
 
-        logging.info(f"Staff with no barcodes: {no_barcode}")
-        logging.info(f"Staff defaulted to the 'Staff' patron group: {defaulted}")
-        logging.info(f"{len(self.staffOut)} Staff Records Converted")        
+        logging.info('Staff with no barcodes: %s', no_barcode)
+        logging.info(
+            'Staff defaulted to the \'Staff\' patron group: %s', defaulted)
+        logging.info('%s Staff Records Converted', len(self.staff_out))
         self._logElapsedTime()
         logging.info("Staff Records converted successfully\n")
 
     # Saves Current Staff Data as a csv and triggers a config update if indicated for condensed files
-    def saveCurrentStaffData(self, loadStep, updateConfig=False):
-        file = f"{os.getenv('loadProcessDirectory')}/Staff-{loadStep}--{self.time.year}-{self.time.month}-{self.time.day}-" \
-               f"-{self.time.hour}-{self.time.minute}-{self.time.second}.csv"
-        logging.info(f"Saving Staff {loadStep} to: {file}")
-        self.staffCSV.to_csv(file, index=False, sep="|")
-        if updateConfig and loadStep == "Condensed":
+    def saveCurrentStaffData(self, load_step, update_config=False):
+        file = f"{os.getenv('loadProcessDirectory')}/Staff-{load_step}.csv"
+        logging.info('Saving Staff %s to: %s', load_step, file)
+        self.staff_CSV.to_csv(file, index=False, sep="|")
+        if update_config and load_step == "Condensed":
             self._updateConfig("previousStaffCondense", file)
 
     # Saves Current student data as a csv and triggers a config update if indicated for condensed files
-    def saveCurrentStudentData(self, loadStep, updateConfig=False):
-        file = f"{os.getenv('loadProcessDirectory')}/Student-{loadStep}--{self.time.year}-{self.time.month}-{self.time.day}-" \
-               f"-{self.time.hour}-{self.time.minute}-{self.time.second}.csv"
-        logging.info(f"Saving Student {loadStep} to: {file}")
-        self.studentCSV.to_csv(file, index=False, sep="|")
-        if updateConfig and loadStep == "Condensed":
+    def saveCurrentStudentData(self, load_step, update_config=False):
+        file = f"{os.getenv('loadProcessDirectory')}/Student-{load_step}.csv"
+        logging.info('Saving Student %s to: %s', load_step, file)
+        self.student_CSV.to_csv(file, index=False, sep="|")
+        if update_config and load_step == "Condensed":
             self._updateConfig("previousStudentCondense", file)
 
     # Saves Current Staff and Student data together in a json file that is ready-to-load
     def saveLoadData(self):
-        with open(self.patronOutFileName, 'w') as outfile:
-            for staff in self.staffOut:
+        with open(self.patron_out_file_name, 'w', encoding='utf-8') as outfile:
+            for staff in self.staff_out:
                 outfile.write(f"{json.dumps(staff)}\n")
-            for student in self.studentOut:
+            for student in self.student_out:
                 outfile.write(f"{json.dumps(student)}\n")
-        logging.info(f"Patron Records saved to: {self.patronOutFileName}")
+        logging.info('Patron Records saved to: %s', self.patron_out_file_name)
 
 
 if __name__ == "__main__":
@@ -791,22 +815,21 @@ if __name__ == "__main__":
     dotenv.load_dotenv(config)
     start_time = datetime.now()
     logFile = f'{os.getenv("logFileDirectory")}/{start_time.year}-{start_time.month}-{start_time.day}--{start_time.hour}-{start_time.minute}-{start_time.second}.log'
-    logging.basicConfig(filename=logFile, encoding='utf-8', level=logging.DEBUG, format='%(asctime)s | %(levelname)s | %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
+    logging.basicConfig(filename=logFile, encoding='utf-8', level=logging.DEBUG,
+                        format='%(asctime)s | %(levelname)s | %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
     print(f"Saving log to: {logFile}")
-    logging.info(f'Beginning Log')
+    logging.info('Beginning Log')
 
     # Logs Current Configuration and Raises an exception if a required configuration field is missing
-    for field in ['staffFileName', 'studentFileName', 'destinationFolder', 'fullLoad', 
-                    'previousStudentCondense', 'previousStaffCondense', 
-                    'loadProcessDirectory', 'logFileDirectory']:
+    for field in ['staffFileName', 'studentFileName', 'destinationFolder', 'fullLoad',
+                  'previousStudentCondense', 'previousStaffCondense',
+                  'loadProcessDirectory', 'logFileDirectory']:
         try:
-            logging.info(f"Config - {field} = {os.getenv(field)}")
-        except:
-            logging.critical(f".env file must contain a value for {field}")
-            raise Exception
+            logging.info('Config - %s = %s', field, os.getenv(field))
+        except ValueError as exc:
+            logging.critical('.env file must contain a value for %s', field)
+            raise ValueError from exc
 
     # Actually uses the object to convert data
-    converter = patronDataConverter(config, start_time)
+    converter = PatronDataTransformer(config, start_time)
     converter.preparePatronLoad()
-    converter._logElapsedTime()
-    
