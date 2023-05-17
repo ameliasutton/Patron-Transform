@@ -91,7 +91,9 @@ class PatronDataTransformer:
         self.staff_out = []
 
         self.time = time
-        if os.getenv('destinationFolder')[-1:] == '/':
+        if os.getenv('destinationFolder') == '':
+            self.patron_out_file_name = 'umpatrons.json'
+        elif os.getenv('destinationFolder')[-1:] == '/':
             self.patron_out_file_name = f'{os.getenv("destinationFolder")}umpatrons.json'
         else:
             self.patron_out_file_name = f'{os.getenv("destinationFolder")}/umpatrons.json'
@@ -550,18 +552,17 @@ class PatronDataTransformer:
                 for option in graduate_options:
                     if option != '':
                         years.append(option[-4:])
-                        match option[:-5]:
-                            case "Sprng":
-                                semesters.append(4)
-                            case "Summr":
-                                semesters.append(3)
-                            case "Fall":
-                                semesters.append(2)
-                            case "Wintr":
-                                semesters.append(1)
-                            case _:
-                                logging.warning(
-                                    'Malformed Graduation Date: %s', option)
+                        if option[:-5] == 'Sprng':
+                            semesters.append(4)
+                        elif option[:-5] == 'Summr':
+                            semesters.append(3)
+                        elif option[:-5] == 'Fall':
+                            semesters.append(2)
+                        elif option[:-5] == 'Wintr':
+                            semesters.append(1)
+                        else:
+                            logging.warning(
+                                'Malformed Graduation Date: %s', option)
                 max_year = max(years)
                 semester = max([semesters[index] for index,
                                year in enumerate(years) if year == max_year])
@@ -570,18 +571,17 @@ class PatronDataTransformer:
                 for option in undergraduate_options:
                     if option != '':
                         years.append(option[-4:])
-                        match option[:-5]:
-                            case "Sprng":
-                                semesters.append(4)
-                            case "Summr":
-                                semesters.append(3)
-                            case "Fall":
-                                semesters.append(2)
-                            case "Wintr":
-                                semesters.append(1)
-                            case _:
-                                logging.warning(
-                                    'Malformed Graduation Date: %s', option)
+                        if option[:-5] == 'Sprng':
+                            semesters.append(4)
+                        elif option[:-5] == 'Summr':
+                            semesters.append(3)
+                        elif option[:-5] == 'Fall':
+                            semesters.append(2)
+                        elif option[:-5] == 'Wintr':
+                            semesters.append(1)
+                        else:
+                            logging.warning(
+                                'Malformed Graduation Date: %s', option)
                 max_year = max(years)
                 semester = max([semesters[index] for index,
                                year in enumerate(years) if year == max_year])
@@ -591,22 +591,21 @@ class PatronDataTransformer:
                 max_year = datetime.now().year + 1
                 semester = 0
 
-            match semester:
-                case 0:
-                    expiration_day = datetime.today() + relativedelta(years=2)
-                    expire_date = f'{expiration_day.year:04}-{expiration_day.month:02}-{expiration_day.day:02}'
-                case 1:
-                    grad_date = f'Winter {max_year}'
-                    expire_date = f'{int(max_year)+1}-02-15'
-                case 2:
-                    grad_date = f'Fall {max_year}'
-                    expire_date = f'{int(max_year)+1}-01-15'
-                case 3:
-                    grad_date = f'Summer {max_year}'
-                    expire_date = f'{max_year}-09-15'
-                case 4:
-                    grad_date = f'Spring {max_year}'
-                    expire_date = f'{max_year}-06-05'
+            if semester == 0:
+                expiration_day = datetime.today() + relativedelta(years=2)
+                expire_date = f'{expiration_day.year:04}-{expiration_day.month:02}-{expiration_day.day:02}'
+            elif semester == 1:
+                grad_date = f'Winter {max_year}'
+                expire_date = f'{int(max_year)+1}-02-15'
+            elif semester == 2:
+                grad_date = f'Fall {max_year}'
+                expire_date = f'{int(max_year)+1}-01-15'
+            elif semester == 3:
+                grad_date = f'Summer {max_year}'
+                expire_date = f'{max_year}-09-15'
+            elif semester == 4:
+                grad_date = f'Spring {max_year}'
+                expire_date = f'{max_year}-06-05'
 
             # Determines the student's preferred phone number if a preference exists.
             try:

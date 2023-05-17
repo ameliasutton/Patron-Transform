@@ -4,10 +4,14 @@
 /Old Test Data
 /.idea
 /.vscode
-PatronImport.code-workspace
+/PatronTransform.code-workspace
 /Testing_Output
 /Previously loaded Files
 /.env
 /test.env
 /Patron Transform Files
 /Old
+/umpatrons.json
+/Setup Information.txt
+/transformPatronData.zip
+/Results
