@@ -520,31 +520,24 @@ class PatronDataTransformer:
             grad_date = "UNKNOWN"
             graduate_options = []
             undergraduate_options = []
-            if "GRAD" in academic_career:
-                term = grad_terms[academic_career.index("GRAD")]
-                graduate_options.append(term)
-            if "ND" in academic_career:
-                program = academic_programs[academic_career.index("ND")]
-                if program == "ND-ST":
-                    term = grad_terms[academic_programs.index(program)]
-                    undergraduate_options.append(term)
-                elif program == "ND-UG":
-                    term = grad_terms[academic_programs.index(program)]
-                    undergraduate_options.append(term)
-                elif program == "ND-CE":
-                    term = grad_terms[academic_programs.index(program)]
-                    undergraduate_options.append(term)
-                elif program == "ND-GR":
-                    term = grad_terms[academic_programs.index(program)]
-                    graduate_options.append(term)
-            if "UGRD" in academic_career:
-                term = grad_terms[academic_career.index("UGRD")]
-                undergraduate_options.append(term)
-            if "NC" in academic_career:
-                program = academic_programs[academic_career.index("NC")]
-                if program == "NC-LL":
-                    term = grad_terms[academic_programs.index(program)]
-                    undergraduate_options.append(term)
+            for index, option in enumerate(academic_career):
+                if option == "GRAD":
+                    graduate_options.append(grad_terms[index])
+                if option == "ND":
+                    program = academic_programs[index]
+                    if program == "ND-ST":
+                        undergraduate_options.append(grad_terms[index])
+                    elif program == "ND-UG":
+                        undergraduate_options.append(grad_terms[index])
+                    elif program == "ND-CE":
+                        undergraduate_options.append(grad_terms[index])
+                    elif program == "ND-GR":
+                        graduate_options.append(grad_terms[index])          
+                if option == "UGRD":
+                    undergraduate_options.append(grad_terms[index])
+                if option == "NC":
+                    if academic_programs[index] == "NC-LL":
+                        undergraduate_options.append(grad_terms[index])
             years = []
             semesters = []
             if graduate_options and graduate_options != ['']:
