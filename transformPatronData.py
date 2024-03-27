@@ -510,7 +510,7 @@ class PatronDataTransformer:
             if (student['AcadProg1'] == '' and student['AcadProg2'] == '' and student['AcadProg3'] == ''):
                 active = False
                 patron_group = default_patron_group
-                expire_date= f"{datetime.now().year}-{datetime.now().month}-{datetime.now().day}"
+                expire_date= datetime.now().strftime('%Y-%m-%d')
             else:
                 active = True
                 academic_career = [student["AcadCareer1"],
