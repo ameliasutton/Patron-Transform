@@ -103,8 +103,7 @@ class PatronDataTransformer:
         self._logElapsedTime()
         logging.info("Patron data converter initialized\n")
 
-    # Logs time elapsed since the time passed into the object on initialization
-
+    # Logs time elapsed since the time passed into the object on initialization  
     def _logElapsedTime(self):
         time_now = datetime.now()
         elapsed_time = time_now - self.time
@@ -277,7 +276,7 @@ class PatronDataTransformer:
 
         for row in self.student_CSV.itertuples():
             patron = row._asdict()
-            if not (patron["barcode"] == '' or (patron['AcadProg1'] == '' and patron['AcadProg2'] == '' and patron['AcadProg3'] == '')):
+            if not patron["barcode"] == '':
                 condensed_list.append(patron)
             else:
                 skipped += 1
@@ -506,99 +505,105 @@ class PatronDataTransformer:
             student = row._asdict()
 
             # Logic for determining Patron Group, prioritizes highest level programs of study then latest graduation date.
-
-            academic_career = [student["AcadCareer1"],
-                               student["AcadCareer2"],
-                               student["AcadCareer3"]]
-            academic_programs = [student["AcadProg1"],
-                                 student["AcadProg2"],
-                                 student["AcadProg3"]]
-            grad_terms = [student["TermDescr1"],
-                          student["TermDescr2"],
-                          student["TermDescr3"]]
             default_patron_group = "Undergraduate"
             grad_date = "UNKNOWN"
-            graduate_options = []
-            undergraduate_options = []
-            for index, option in enumerate(academic_career):
-                if option == "GRAD":
-                    graduate_options.append(grad_terms[index])
-                if option == "ND":
-                    program = academic_programs[index]
-                    if program == "ND-ST":
-                        undergraduate_options.append(grad_terms[index])
-                    elif program == "ND-UG":
-                        undergraduate_options.append(grad_terms[index])
-                    elif program == "ND-CE":
-                        undergraduate_options.append(grad_terms[index])
-                    elif program == "ND-GR":
-                        graduate_options.append(grad_terms[index])          
-                if option == "UGRD":
-                    undergraduate_options.append(grad_terms[index])
-                if option == "NC":
-                    if academic_programs[index] == "NC-LL":
-                        undergraduate_options.append(grad_terms[index])
-            years = []
-            semesters = []
-            if graduate_options and graduate_options != ['']:
-                patron_group = "Graduate"
-                for option in graduate_options:
-                    if option != '':
-                        years.append(option[-4:])
-                        if option[:-5] == 'Sprng':
-                            semesters.append(4)
-                        elif option[:-5] == 'Summr':
-                            semesters.append(3)
-                        elif option[:-5] == 'Fall':
-                            semesters.append(2)
-                        elif option[:-5] == 'Wintr':
-                            semesters.append(1)
-                        else:
-                            logging.warning(
-                                'Malformed Graduation Date: %s', option)
-                max_year = max(years)
-                semester = max([semesters[index] for index,
-                               year in enumerate(years) if year == max_year])
-            elif undergraduate_options and undergraduate_options != ['']:
-                patron_group = "Undergraduate"
-                for option in undergraduate_options:
-                    if option != '':
-                        years.append(option[-4:])
-                        if option[:-5] == 'Sprng':
-                            semesters.append(4)
-                        elif option[:-5] == 'Summr':
-                            semesters.append(3)
-                        elif option[:-5] == 'Fall':
-                            semesters.append(2)
-                        elif option[:-5] == 'Wintr':
-                            semesters.append(1)
-                        else:
-                            logging.warning(
-                                'Malformed Graduation Date: %s', option)
-                max_year = max(years)
-                semester = max([semesters[index] for index,
-                               year in enumerate(years) if year == max_year])
-            else:
-                defaulted += 1
+            if (student['AcadProg1'] == '' and student['AcadProg2'] == '' and student['AcadProg3'] == ''):
+                active = False
                 patron_group = default_patron_group
-                max_year = datetime.now().year + 1
-                semester = 0
+                expire_date= f"{datetime.now().year}-{datetime.now().month}-{datetime.now().day}"
+            else:
+                active = True
+                academic_career = [student["AcadCareer1"],
+                                student["AcadCareer2"],
+                                student["AcadCareer3"]]
+                academic_programs = [student["AcadProg1"],
+                                    student["AcadProg2"],
+                                    student["AcadProg3"]]
+                grad_terms = [student["TermDescr1"],
+                            student["TermDescr2"],
+                            student["TermDescr3"]]
+                graduate_options = []
+                undergraduate_options = []
+                for index, option in enumerate(academic_career):
+                    if option == "GRAD":
+                        graduate_options.append(grad_terms[index])
+                    if option == "ND":
+                        program = academic_programs[index]
+                        if program == "ND-ST":
+                            undergraduate_options.append(grad_terms[index])
+                        elif program == "ND-UG":
+                            undergraduate_options.append(grad_terms[index])
+                        elif program == "ND-CE":
+                            undergraduate_options.append(grad_terms[index])
+                        elif program == "ND-GR":
+                            graduate_options.append(grad_terms[index])          
+                    if option == "UGRD":
+                        undergraduate_options.append(grad_terms[index])
+                    if option == "NC":
+                        if academic_programs[index] == "NC-LL":
+                            undergraduate_options.append(grad_terms[index])
+                years = []
+                semesters = []
+                if graduate_options and graduate_options != ['']:
+                    patron_group = "Graduate"
+                    for option in graduate_options:
+                        if option != '':
+                            years.append(option[-4:])
+                            if option[:-5] == 'Sprng':
+                                semesters.append(4)
+                            elif option[:-5] == 'Summr':
+                                semesters.append(3)
+                            elif option[:-5] == 'Fall':
+                                semesters.append(2)
+                            elif option[:-5] == 'Wintr':
+                                semesters.append(1)
+                            else:
+                                logging.warning(
+                                    'Malformed Graduation Date: %s', option)
+                    max_year = max(years)
+                    semester = max([semesters[index] for index,
+                                year in enumerate(years) if year == max_year])
+                elif undergraduate_options and undergraduate_options != ['']:
+                    patron_group = "Undergraduate"
+                    for option in undergraduate_options:
+                        if option != '':
+                            years.append(option[-4:])
+                            if option[:-5] == 'Sprng':
+                                semesters.append(4)
+                            elif option[:-5] == 'Summr':
+                                semesters.append(3)
+                            elif option[:-5] == 'Fall':
+                                semesters.append(2)
+                            elif option[:-5] == 'Wintr':
+                                semesters.append(1)
+                            else:
+                                logging.warning(
+                                    'Malformed Graduation Date: %s', option)
+                    max_year = max(years)
+                    semester = max([semesters[index] for index,
+                                year in enumerate(years) if year == max_year])
+                else:
+                    defaulted += 1
+                    patron_group = default_patron_group
+                    max_year = datetime.now().year + 1
+                    semester = 0
 
-            if semester == 0:
-                expiration_day = datetime.today() + relativedelta(years=2)
-                expire_date = f'{expiration_day.year:04}-{expiration_day.month:02}-{expiration_day.day:02}'
-            elif semester == 1:
-                grad_date = f'Winter {max_year}'
-                expire_date = f'{int(max_year)+1}-02-15'
-            elif semester == 2:
-                grad_date = f'Fall {max_year}'
-                expire_date = f'{int(max_year)+1}-01-15'
-            elif semester == 3:
-                grad_date = f'Summer {max_year}'
-                expire_date = f'{max_year}-09-15'
-            elif semester == 4:
-                grad_date = f'Spring {max_year}'
-                expire_date = f'{max_year}-06-05'
+                if semester == 0:
+                    expiration_day = datetime.today() + relativedelta(years=2)
+                    expire_date = f'{expiration_day.year:04}-{expiration_day.month:02}-{expiration_day.day:02}'
+                elif semester == 1:
+                    grad_date = f'Winter {max_year}'
+                    expire_date = f'{int(max_year)+1}-02-15'
+                elif semester == 2:
+                    grad_date = f'Fall {max_year}'
+                    expire_date = f'{int(max_year)+1}-01-15'
+                elif semester == 3:
+                    grad_date = f'Summer {max_year}'
+                    expire_date = f'{max_year}-09-15'
+                elif semester == 4:
+                    grad_date = f'Spring {max_year}'
+                    expire_date = f'{max_year}-06-05'
+                
 
             # Determines the student's preferred phone number if a preference exists.
             try:
@@ -616,7 +621,7 @@ class PatronDataTransformer:
                 "username": student["Email_Address"],
                 "externalSystemId": str(student["EMPLID"]) + "@umass.edu",
                 "barcode": student["barcode"],
-                "active": True,
+                "active": active,
                 "patronGroup": patron_group,
                 "departments": [],
                 "personal":
