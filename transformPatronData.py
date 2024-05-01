@@ -95,8 +95,10 @@ class PatronDataTransformer:
             self.patron_out_file_name = 'umpatrons.json'
         elif os.getenv('destinationFolder')[-1:] == '/':
             self.patron_out_file_name = f'{os.getenv("destinationFolder")}umpatrons.json'
+            self.dated_out_file_name = f'{os.getenv("destinationFolder")}{datetime.today().day}-{datetime.today().month}-{datetime.today().year}-umpatrons.json'
         else:
             self.patron_out_file_name = f'{os.getenv("destinationFolder")}/umpatrons.json'
+            self.dated_out_file_name = f'{os.getenv("destinationFolder")}/{datetime.today().day}-{datetime.today().month}-{datetime.today().year}-umpatrons.json'
 
         logging.info('Prepared load file will be saved as: %s',
                      self.patron_out_file_name)
@@ -799,12 +801,20 @@ class PatronDataTransformer:
 
     # Saves Current Staff and Student data together in a json file that is ready-to-load
     def saveLoadData(self):
+        #Saves file for current load
         with open(self.patron_out_file_name, 'w', encoding='utf-8') as outfile:
             for staff in self.staff_out:
                 outfile.write(f"{json.dumps(staff)}\n")
             for student in self.student_out:
                 outfile.write(f"{json.dumps(student)}\n")
+        #Saves dated file for future auditing
+        with open(self.dated_out_file_name, 'w', encoding='utf-8') as outfile:
+            for staff in self.staff_out:
+                outfile.write(f"{json.dumps(staff)}\n")
+            for student in self.student_out:
+                outfile.write(f"{json.dumps(student)}\n")
         logging.info('Patron Records saved to: %s', self.patron_out_file_name)
+        logging.info('Patron Records also saved to: %s', self.dated_out_file_name)
 
 
 if __name__ == "__main__":
