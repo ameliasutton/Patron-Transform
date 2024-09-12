@@ -206,13 +206,13 @@ class PatronDataTransformer:
         current_id_rows = []
 
         for row in records_in:
+            if row["EmplStatus"] in status_remapping.keys():
+                row["EmplStatus"] = status_remapping[row["EmplStatus"]]   
             if last_emplid == "":
                 last_emplid = row["EMPLID"]
             elif last_emplid == row["EMPLID"]:
                 current_id_rows.append(row)
             else:
-                if row["EmplStatus"] in status_remapping.keys():
-                    row["EmplStatus"] = status_remapping[row["EmplStatus"]]
                 if len(current_id_rows) == 1:
                     records_out.append(current_id_rows[0])
                 elif len(current_id_rows) != 0:
