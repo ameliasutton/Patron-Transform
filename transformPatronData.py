@@ -661,8 +661,7 @@ class PatronDataTransformer:
                         ],
                         "preferredContactTypeId": "Email"
                 },
-                "enrollmentDate": "",
-                "expirationDate": expire_date,
+                "expirationDate": expire_date, # If this needs to validate as date-time append "T00:00:00.000+00:00"
                 "customFields": {
                     "institution": "UMass Amherst",
                     "graduationDate": grad_date
@@ -768,7 +767,7 @@ class PatronDataTransformer:
                         ],
                         "preferredContactTypeId": "Email"
                 },
-                "expirationDate": expiration_date,
+                "expirationDate": expiration_date, # If this needs to validate as date-time append "T00:00:00.000+00:00"
                 "customFields": {
                     "institution": "UMass Amherst"
                 }
