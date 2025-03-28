@@ -307,10 +307,8 @@ class PatronDataTransformer:
             file_ends = {"old": False, "new": False}
             updated = 0
             new = 0
-            compared_fields = ["EmplClass", "EmplStatus", "LastName", "FirstName", "MiddleName", "Email_Address",
-                               "MailCountry", "MailCity", "MailState", "MailZip", "MailAdd1", "MailAdd2", "MailAdd3",
-                               "MailAdd4", "PermCountry", "PermCity", "PermState", "PermZip", "PermAdd1", "PermAdd2",
-                               "PermAdd3", "PermAdd4", "WorkPhone", "barcode"]
+            # Removed Address and Phone Number from diff comparison
+            compared_fields = ["EmplClass", "EmplStatus", "LastName", "FirstName", "MiddleName", "Email_Address", "barcode"]
 
             while (not file_ends["old"]) and (not file_ends["new"]):
                 next_old = False
@@ -376,11 +374,10 @@ class PatronDataTransformer:
             file_ends = {"old": False, "new": False}
             updated = 0
             new = 0
+            # Removed Address and Phone Number from diff comparison
             compared_fields = ["AcadCareer1", "AcadCareer2", "AcadCareer3", "AcadProg1", "AcadProg2", "AcadProg3",
-                               "LastName", "FirstName", "MiddleName", "Email_Address", "MailCountry", "MailCity",
-                               "MailState", "MailZip", "MailAdd1", "MailAdd2", "MailAdd3", "MailAdd4", "PermCountry",
-                               "PermCity", "PermState", "PermZip", "PermAdd1", "PermAdd2", "PermAdd3", "PermAdd4",
-                               "TermDescr1", "TermDescr2", "TermDescr3", "LoclPhone", "barcode"]
+                               "LastName", "FirstName", "MiddleName", "Email_Address", 
+                               "TermDescr1", "TermDescr2", "TermDescr3", "barcode"]
 
             while (not file_ends["old"]) and (not file_ends["new"]):
                 next_old = False
@@ -631,34 +628,7 @@ class PatronDataTransformer:
                         "lastName": student["LastName"],
                         "firstName": student["FirstName"],
                         "middleName": student["MiddleName"],
-                        "email": student["Email_Address"],
-                        "phone": phone,
-                        "addresses": [
-                            {
-                                "countryId": student["MailCountry"],
-                                "addressLine1": student["MailAdd1"],
-                                "addressLine2": str(student["MailAdd2"]) + " "
-                                + str(student["MailAdd3"]) + " "
-                                + str(student["MailAdd4"]),
-                                "city": student["MailCity"],
-                                "region": student["MailState"],
-                                "postalCode": student["MailZip"],
-                                "addressTypeId": "Primary",
-                                "primaryAddress": True
-                            },
-                            {
-                                "countryId": student["PermCountry"],
-                                "addressLine1": student["PermAdd1"],
-                                "addressLine2": str(student["PermAdd2"]) + " "
-                                + str(student["PermAdd3"]) + " "
-                                + str(student["PermAdd4"]),
-                                "city": student["PermCity"],
-                                "region": student["PermState"],
-                                "postalCode": student["PermZip"],
-                                "addressTypeId": "Secondary",
-                                "primaryAddress": False
-                            }
-                        ],
+                        "email": student["Email_Address"], # Removed Addresses and Phone Numbers
                         "preferredContactTypeId": "Email"
                 },
                 "expirationDate": expire_date, # If this needs to validate as date-time append "T00:00:00.000+00:00"
@@ -737,34 +707,7 @@ class PatronDataTransformer:
                         "lastName": staff["LastName"],
                         "firstName": staff["FirstName"],
                         "middleName": staff["MiddleName"],
-                        "email": email,
-                        "phone": staff["WorkPhone"],
-                        "addresses": [
-                            {
-                                "countryId": staff["MailCountry"],
-                                "addressLine1": staff["MailAdd1"],
-                                "addressLine2": str(staff["MailAdd2"]) + " "
-                                + str(staff["MailAdd3"]) + " "
-                                + str(staff["MailAdd4"]),
-                                "city": staff["MailCity"],
-                                "region": staff["MailState"],
-                                "postalCode": staff["MailZip"],
-                                "addressTypeId": "Primary",
-                                "primaryAddress": True
-                            },
-                            {
-                                "countryId": staff["PermCountry"],
-                                "addressLine1": staff["PermAdd1"],
-                                "addressLine2": str(staff["PermAdd2"]) + " "
-                                + str(staff["PermAdd3"]) + " "
-                                + str(staff["PermAdd4"]),
-                                "city": staff["PermCity"],
-                                "region": staff["PermState"],
-                                "postalCode": staff["PermZip"],
-                                "addressTypeId": "Secondary",
-                                "primaryAddress": False
-                            }
-                        ],
+                        "email": email, # Removed Addresses & Phone Number
                         "preferredContactTypeId": "Email"
                 },
                 "expirationDate": expiration_date, # If this needs to validate as date-time append "T00:00:00.000+00:00"
