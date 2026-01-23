@@ -603,18 +603,6 @@ class PatronDataTransformer:
                     grad_date = f'Spring {max_year}'
                     expire_date = f'{max_year}-06-05'
                 
-
-            # Determines the student's preferred phone number if a preference exists.
-            try:
-                if student['Phone_Pref'][0:4] == 'LOCL':
-                    phone = student['LoclPhone']
-                elif student['Phone_Pref'][0:4] == 'PERM':
-                    phone = student['PermPhone']
-                else:
-                    phone = ''
-            except KeyError:
-                phone = student['LoclPhone']
-
             # Maps each patron's data into a list to be added to the output file
             patron_json = {
                 "username": student["Email_Address"],
