@@ -17,8 +17,10 @@ class PatronDataTransformer:
         try:
             logging.info('Reading staff file... \"%s\"...',
                          os.getenv('staffFileName'))
-            self.staff_CSV = pandas.read_csv(
-                os.getenv('staffFileName'), delimiter="|", dtype="string")
+            with open(os.getenv('staffFileName'), 'r', encoding='utf-8') as file:
+                headers = file.readline().strip().split('|')
+                self.staff_CSV = pandas.read_csv(
+                file, names=headers, delimiter="|", dtype="string")
         except FileNotFoundError as exc:
             logging.critical('Staff load file, \"%s\", not found',
                              os.getenv('staffFileName'))
@@ -613,6 +615,7 @@ class PatronDataTransformer:
                 "departments": [],
                 "personal":
                     {
+                        "pronouns":student["Pronoun"].strip(),
                         "lastName": student["LastName"],
                         "firstName": student["FirstName"],
                         "middleName": student["MiddleName"],
@@ -692,6 +695,7 @@ class PatronDataTransformer:
                 "departments": [],
                 "personal":
                     {
+                        "pronouns": staff["Pronoun"].strip(),
                         "lastName": staff["LastName"],
                         "firstName": staff["FirstName"],
                         "middleName": staff["MiddleName"],
