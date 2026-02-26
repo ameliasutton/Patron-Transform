@@ -310,7 +310,7 @@ class PatronDataTransformer:
             updated = 0
             new = 0
             # Removed Address and Phone Number from diff comparison
-            compared_fields = ["EmplClass", "EmplStatus", "LastName", "FirstName", "MiddleName", "Email_Address", "barcode"]
+            compared_fields = ["EmplClass", "EmplStatus", "LastName", "FirstName", "MiddleName", "Email_Address", "barcode", "Pronoun"]
 
             while (not file_ends["old"]) and (not file_ends["new"]):
                 next_old = False
@@ -379,7 +379,7 @@ class PatronDataTransformer:
             # Removed Address and Phone Number from diff comparison
             compared_fields = ["AcadCareer1", "AcadCareer2", "AcadCareer3", "AcadProg1", "AcadProg2", "AcadProg3",
                                "LastName", "FirstName", "MiddleName", "Email_Address", 
-                               "TermDescr1", "TermDescr2", "TermDescr3", "barcode"]
+                               "TermDescr1", "TermDescr2", "TermDescr3", "barcode", "Pronoun"]
 
             while (not file_ends["old"]) and (not file_ends["new"]):
                 next_old = False
