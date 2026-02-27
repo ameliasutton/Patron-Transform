@@ -561,9 +561,15 @@ class PatronDataTransformer:
                             else:
                                 logging.warning(
                                     'Malformed Graduation Date: %s', option)
-                    max_year = max(years)
-                    semester = max([semesters[index] for index,
-                                year in enumerate(years) if year == max_year])
+                    if len(years) == 0:
+                        defaulted += 1
+                        patron_group = default_patron_group
+                        max_year = datetime.now().year + 1
+                        semester = 0
+                    else:
+                        max_year = max(years)
+                        semester = max([semesters[index] for index,
+                                    year in enumerate(years) if year == max_year])
                 elif undergraduate_options and undergraduate_options != ['']:
                     patron_group = "Undergraduate"
                     for option in undergraduate_options:
@@ -580,9 +586,15 @@ class PatronDataTransformer:
                             else:
                                 logging.warning(
                                     'Malformed Graduation Date: %s', option)
-                    max_year = max(years)
-                    semester = max([semesters[index] for index,
-                                year in enumerate(years) if year == max_year])
+                    if len(years) == 0:
+                        defaulted += 1
+                        patron_group = default_patron_group
+                        max_year = datetime.now().year + 1
+                        semester = 0
+                    else:
+                        max_year = max(years)
+                        semester = max([semesters[index] for index,
+                                    year in enumerate(years) if year == max_year])
                 else:
                     defaulted += 1
                     patron_group = default_patron_group
