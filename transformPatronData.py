@@ -323,19 +323,12 @@ class PatronDataTransformer:
                     new += 1
                     next_new = True
                 else:
-                    change = False
                     for compared_field in compared_fields:
                         if str(old_record[compared_field]) != (new_record[compared_field]):
-                            logging.info('Modified field: %s', compared_field)
-                            change = True
+                            logging.info('Updated Staff - EMPLID: %s, Modified field: %s', old_record["EMPLID"], compared_field)
+                            staff_changes.append(new_record)
+                            updated += 1
                             break
-                    if change:
-                        logging.info(
-                            'Modified field - Old Record: %s', old_record)
-                        logging.info(
-                            'Modified field - New Record: %s', new_record)
-                        staff_changes.append(new_record)
-                        updated += 1
                     next_old = True
                     next_new = True
 
@@ -392,19 +385,12 @@ class PatronDataTransformer:
                     new += 1
                     next_new = True
                 else:
-                    change = False
                     for compared_field in compared_fields:
                         if str(old_record[compared_field]) != (new_record[compared_field]):
-                            logging.info('Modified field: %s', compared_field)
-                            change = True
+                            logging.info('Updated Student - EMPLID: %s, Modified field: %s', old_record["EMPLID"], compared_field)
+                            student_changes.append(new_record)
+                            updated += 1
                             break
-                    if change:
-                        logging.info(
-                            'Modified field - Old Record: %s', old_record)
-                        logging.info(
-                            'Modified field - New Record: %s', new_record)
-                        student_changes.append(new_record)
-                        updated += 1
                     next_old = True
                     next_new = True
 
