@@ -602,7 +602,10 @@ class PatronDataTransformer:
                 elif semester == 4:
                     grad_date = f'Spring {max_year}'
                     expire_date = f'{max_year}-06-05'
-                
+            if student["Pronoun"].strip() == 'undisclose':
+                pronoun = ""
+            else:
+                pronoun = student["Pronoun"].strip()
             # Maps each patron's data into a list to be added to the output file
             patron_json = {
                 "username": student["Email_Address"],
@@ -613,7 +616,7 @@ class PatronDataTransformer:
                 "departments": [],
                 "personal":
                     {
-                        "pronouns":student["Pronoun"].strip(),
+                        "pronouns":pronoun,
                         "lastName": student["LastName"],
                         "firstName": student["FirstName"],
                         "middleName": student["MiddleName"],
@@ -684,6 +687,11 @@ class PatronDataTransformer:
             else:
                 email = staff["Email_Address"]
 
+            if staff["Pronoun"].strip() == "undisclose":
+                pronoun = ""
+            else:
+                pronoun = staff["Pronoun"].strip()
+
             patron_json = {
                 "username": email,
                 "externalSystemId": str(staff["EMPLID"]) + "@umass.edu",
@@ -693,7 +701,7 @@ class PatronDataTransformer:
                 "departments": [],
                 "personal":
                     {
-                        "pronouns": staff["Pronoun"].strip(),
+                        "pronouns": pronoun,
                         "lastName": staff["LastName"],
                         "firstName": staff["FirstName"],
                         "middleName": staff["MiddleName"],
