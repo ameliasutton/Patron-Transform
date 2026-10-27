@@ -495,6 +495,8 @@ class PatronDataTransformer:
             default_patron_group = "Undergraduate"
             grad_date = "UNKNOWN"
             if (student['AcadProg1'] == '' and student['AcadProg2'] == '' and student['AcadProg3'] == ''):
+                if self.full_load:
+                    continue
                 active = False
                 patron_group = default_patron_group
                 expire_date= datetime.now().strftime('%Y-%m-%d')
